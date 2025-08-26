@@ -3688,6 +3688,7 @@ server_client_dispatch_command(struct client *c, struct imsg *imsg)
 	cmdq_append(c, new_item);
 	cmdq_append(c, cmdq_get_callback(server_client_command_done, NULL));
 
+	cmd_list_free(cmdlist);
 	return (0);
 
 error:
