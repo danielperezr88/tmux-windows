@@ -994,12 +994,27 @@ window_pane_create(struct window *w, u_int sx, u_int sy, u_int hlimit)
 }
 
 static void
+window_pane_free_modes(struct window_pane *wp)
+{
+	struct window_mode_entry	*wme;
+
+	while (!TAILQ_EMPTY(&wp->modes)) {
+		wme = TAILQ_FIRST(&wp->modes);
+		TAILQ_REMOVE(&wp->modes, wme, entry);
+		wme->mode->free(wme);
+		free(wme);
+	}
+
+	wp->screen = &wp->base;
+}
+
+static void
 window_pane_destroy(struct window_pane *wp)
 {
 	struct window_pane_resize	*r;
 	struct window_pane_resize	*r1;
 
-	window_pane_reset_mode_all(wp);
+	window_pane_free_modes(wp);
 	free(wp->searchstr);
 
 	if (wp->fd != -1) {
