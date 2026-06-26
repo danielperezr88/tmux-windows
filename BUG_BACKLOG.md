@@ -555,12 +555,69 @@ These upstream fixes are already applied in the fork:
 | P4.6 | `0057905c` | Escape delay for Windows Terminal (#5088) | ✅ Applied |
 | P4.7 | `ba9faae8` | Free modes on pane destroy (crash fix) | ✅ Applied |
 | P4.8 | `12452f44` | Double-free in MSG_COMMAND argv | ✅ Already present |
-| P4.9 | `724f85d2` | Skip draw when PANE_REDRAW set | ⏸ Deferred (18 conflicts in screen-write.c) |
-| P4.10 | `95afd754` | Full screen-redraw.c rewrite (CP16) | ⏸ Deferred (architectural) |
-| P4.11 | `1c7e164c` | DECSET 2026 synchronized output (CP17) | ✅ Already present |
+| P4.9 | `973c4ab5` | Drop mouse movement events (reduce redraws) | ✅ Applied |
+| P4.10 | `724f85d2` | Skip draw when PANE_REDRAW set | ⏸ Deferred (18 conflicts in screen-write.c) |
+| P4.11 | `95afd754` | Full screen-redraw.c rewrite (CP16) | ⏸ Deferred (architectural) |
+| P4.12 | `1c7e164c` | DECSET 2026 synchronized output (CP17) | ✅ Already present |
 | — | CP7-CP15 (9 commits) | All remaining from original inventory | ✅ Already present |
 
 **Verification:** Release build deployed. `win32-basic.sh` ✅ | `win32-format-strings.sh` ✅ | `win32-has-session.sh` ✅
+
+---
+
+## 8.5 Remobi Gap Analysis — Upstream Features Relevant to remobi
+
+> **Context:** remobi (`github.com/connorads/remobi`) spawns tmux as a PTY process and streams its raw terminal output over WebSocket to a mobile browser. Everything the user sees on their phone is tmux's rendering. Reducing unnecessary terminal output directly improves mobile bandwidth and responsiveness.
+
+### How remobi uses tmux
+
+| Interaction | Mechanism |
+|-------------|-----------|
+| Session creation | `tmux new-session -A -s {name}` via node-pty spawn |
+| Session listing | `tmux list-sessions -F` with pipe-delimited format string |
+| Session attach | `tmux attach-session -t {name}` |
+| Pane/window control | Raw keystrokes: `\x02` (Ctrl-B prefix) + key (c, %, ", z, s, w, [, ?, x) |
+| Window navigation | Swipe gestures mapped to `\x02n` / `\x02p` |
+| Touch scroll | SGR mouse wheel events sent as raw bytes |
+| Zoom toggle | Double-tap sends `\x02z`, mobile auto-zoom via `initData: '\x02z'` |
+| Copy mode | `\x02[` to enter, q to exit |
+| Session refresh | `\x02r` (prefix + r) sent on reconnect |
+
+### Applied (reduces mobile bandwidth waste)
+
+| Commit | Impact on remobi |
+|--------|-----------------|
+| `973c4ab5` | Mouse movement events no longer trigger redraws — touch scroll on mobile produces fewer wasted terminal frames over WebSocket |
+
+### Deferred — High Impact for Mobile (blocked by 3.7 architecture)
+
+| Commit | Mobile Impact | Blocker |
+|--------|--------------|---------|
+| `565db46a` | Only redraw changed lines when sync ends instead of full pane redraw — **single highest-impact change for mobile under heavy agent output** (Claude Code flooding → full pane redraw = huge WebSocket burst) | 20 conflicts; screen-redraw.c references scene architecture from CP16; screen-write.c needs 186 lines of dirty-line tracking from `724f85d2` |
+| `724f85d2` | Skip drawing to tty when PANE_REDRAW already set — eliminates wasted intermediate draws streamed to phone | 18 conflicts in screen-write.c; pervasive refactor of draw path |
+| `e06207c9` | Cache scrollbar options to avoid slow per-redraw lookup — reduces per-frame overhead on mobile | 7 conflicts; depends on `window-visible.c` (3.7-only file) |
+
+### Deferred — Future Features remobi Is Building Toward
+
+| Feature (3.7) | remobi Roadmap Item | Relevance |
+|---------------|---------------------|-----------|
+| **Floating panes** | PLAN.md L2: multiple named sessions | Would enable persistent agent-monitor overlay while working in main pane |
+| **`switch-mode`** (fuzzy switcher) | Replaces `\x02w`/`\x02s` pickers | Dramatically better on phone soft keyboard — fuzzy search vs scrolling |
+| **Copy mode line numbers** | Navigating long agent output on mobile | Line references for specific output in scrollback |
+| **Pane scrollbar auto-hide** (`c29b41e5`) | Current modal scrollbar resizes panes — disruptive on mobile | Auto-hide gives cleaner mobile view without geometry changes |
+| **Prompt system rework** (`51d037e8`) | PLAN.md L6: vim/emacs modal awareness | Per-pane prompts enable better mode detection for toolbar swapping |
+
+### Not Relevant to remobi
+
+- SIXEL / image protocol support (xterm.js rendering, no image protocol in remobi's pipeline)
+- Ghostty terminal features (remobi targets xterm.js)
+- systemd pane dependencies (Linux-only, remobi runs on Windows/macOS)
+- Hyperlink URI limits (not a mobile concern)
+- Tmux 3.7 default color themes (remobi applies its own Catppuccin Mocha theme)
+
+### Conclusion
+
+All remaining upstream gaps that would benefit remobi are **blocked behind the 3.7 architectural rewrite** (screen-redraw.c scene caching + screen-write.c sync refactor). These cannot be cherry-picked individually without the full rewrite. The path to unlocking them is a **rebase onto the 3.7b tag** — which requires reconciling 33 Windows-specific commits and ~90 `#ifdef _WIN32` blocks against a substantially changed codebase.
 
 ---
 
