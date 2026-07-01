@@ -115,7 +115,7 @@ create_discovery_pipe(const char *pipe_name)
 	h = CreateNamedPipeA(pipe_name,
 	    PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 	    PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
-	    1,		/* max instances — prevents pipe name squatting */
+	    8,		/* max instances — allow concurrent connections */
 	    256, 256,	/* output/input buffer sizes */
 	    0, &sa);
 
@@ -524,21 +524,30 @@ win32_ipc_verify_auth(int fd, const char *label, char *tty_token_out,
 	int	n, i, is_tty = 0;
 	char	ch;
 	char	*nonce_part;
+	struct timeval tv;
+	fd_set rset;
 
-	(void)label; /* Nonce verified from pending list, not file. */
+	(void)label;
 
 	/*
-	 * The accepted socket may be non-blocking (inherited from the
-	 * listening socket on Winsock). Set it to blocking temporarily
-	 * so the auth recv completes reliably.
+	 * Bound the blocking auth read with select() + 5s timeout.
+	 * The socket is set blocking temporarily, but we only recv()
+	 * after select() confirms data is available. This prevents a
+	 * slow/malicious client from freezing the server event loop.
 	 */
 	{
 		u_long zero = 0;
 		ioctlsocket((SOCKET)fd, FIONBIO, &zero);
 	}
 
-	/* Read one byte at a time until newline. */
 	for (i = 0; i < (int)(sizeof buf - 1); i++) {
+		tv.tv_sec = 5;
+		tv.tv_usec = 0;
+		FD_ZERO(&rset);
+		FD_SET((SOCKET)fd, &rset);
+		n = select(0, &rset, NULL, NULL, &tv);
+		if (n <= 0)
+			return (-1);
 		n = recv((SOCKET)fd, &ch, 1, 0);
 		if (n != 1)
 			break;

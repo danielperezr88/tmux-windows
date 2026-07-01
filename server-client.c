@@ -3249,6 +3249,7 @@ server_client_check_redraw(struct client *c)
 	u_int			 bit = 0;
 	struct timeval		 tv = { .tv_usec = 1000 };
 	static struct event	 ev;
+	static int		 defer_count = 0;
 	size_t			 left;
 
 	if (c->flags & (CLIENT_CONTROL|CLIENT_SUSPENDED))
@@ -3286,6 +3287,12 @@ server_client_check_redraw(struct client *c)
 		}
 	}
 	if (needed && (left = EVBUFFER_LENGTH(tty->out)) != 0) {
+		if (++defer_count > 50) {
+			defer_count = 0;
+			log_debug("%s: forcing redraw after %zu bytes deferred "
+			    "50 times", c->name, left);
+			goto force_redraw;
+		}
 		log_debug("%s: redraw deferred (%zu left)", c->name, left);
 		if (!evtimer_initialized(&ev))
 			evtimer_set(&ev, server_client_redraw_timer, NULL);
@@ -3323,8 +3330,11 @@ server_client_check_redraw(struct client *c)
 		}
 		c->flags |= client_flags;
 		return;
-	} else if (needed)
+	} else if (needed) {
+		defer_count = 0;
 		log_debug("%s: redraw needed", c->name);
+	}
+force_redraw:
 
 	tty_flags = tty->flags & (TTY_BLOCK|TTY_FREEZE|TTY_NOCURSOR);
 	tty->flags = (tty->flags & ~(TTY_BLOCK|TTY_FREEZE))|TTY_NOCURSOR;
@@ -3688,7 +3698,6 @@ server_client_dispatch_command(struct client *c, struct imsg *imsg)
 	cmdq_append(c, new_item);
 	cmdq_append(c, cmdq_get_callback(server_client_command_done, NULL));
 
-	cmd_list_free(cmdlist);
 	return (0);
 
 error:

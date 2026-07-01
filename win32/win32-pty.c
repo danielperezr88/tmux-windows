@@ -32,16 +32,37 @@ pty_bridge_thread(LPVOID arg)
 	struct win32_pty *pty = (struct win32_pty *)arg;
 	char buf[4096];
 	DWORD n;
+	int sent;
+	struct timeval tv;
+	fd_set wset;
 
 	while (!pty->closing) {
 		if (!ReadFile(pty->hPipeOut, buf, sizeof buf, &n, NULL))
 			break;
 		if (n == 0)
 			break;
-		/* Write to bridge socket so libevent can pick it up. */
-		if (send(pty->bridge_peer, buf, (int)n, 0) <= 0)
+
+		/* Check if socket is writable before sending. If the server
+		 * is applying flow control, select() blocks here (checking
+		 * closing flag every 100ms) instead of stalling in send(). */
+		do {
+			if (pty->closing)
+				goto done;
+			tv.tv_sec = 0;
+			tv.tv_usec = 100000;
+			FD_ZERO(&wset);
+			FD_SET(pty->bridge_peer, &wset);
+			if (select(0, NULL, &wset, NULL, &tv) <= 0)
+				continue;
+			sent = send(pty->bridge_peer, buf, (int)n, 0);
+		} while (sent == SOCKET_ERROR &&
+		    WSAGetLastError() == WSAEWOULDBLOCK &&
+		    !pty->closing);
+
+		if (sent <= 0)
 			break;
 	}
+done:
 
 	/* Signal EOF by closing the socket. */
 	closesocket(pty->bridge_peer);

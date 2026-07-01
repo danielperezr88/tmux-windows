@@ -88,7 +88,11 @@ server_add_pending_tty(const char *token, int fd)
 		if (now - pt->created >= PENDING_TTY_EXPIRY) {
 			log_debug("expiring pending tty: token=%s fd=%d",
 			    pt->token, pt->fd);
+#ifdef _WIN32
+			closesocket((SOCKET)pt->fd);
+#else
 			close(pt->fd);
+#endif
 			TAILQ_REMOVE(&pending_ttys, pt, entry);
 			free(pt);
 		} else
@@ -98,7 +102,11 @@ server_add_pending_tty(const char *token, int fd)
 	/* Enforce cap. */
 	if (count >= MAX_PENDING_TTYS) {
 		log_debug("pending tty queue full, rejecting fd=%d", fd);
+#ifdef _WIN32
+		closesocket((SOCKET)fd);
+#else
 		close(fd);
+#endif
 		return;
 	}
 
@@ -510,6 +518,29 @@ server_accept(int fd, short events, __unused void *data)
 		}
 		fatal("accept failed");
 	}
+
+#ifdef _WIN32
+	/* Enable TCP keepalive so dead connections are detected. */
+	{
+		BOOL	keepalive = TRUE;
+		setsockopt(newfd, SOL_SOCKET, SO_KEEPALIVE,
+		    (const char *)&keepalive, sizeof keepalive);
+	}
+
+	/*
+	 * Reduce socket buffer sizes to approximate Unix PTY semantics.
+	 * Default Windows TCP buffers (64KB) allow too much data to accumulate
+	 * before flow control kicks in, causing the PTY bridge to stall and
+	 * the TTY_BLOCK cycle to trigger with large discard batches.
+	 */
+	{
+		int	bufsize = 8192;
+		setsockopt(newfd, SOL_SOCKET, SO_SNDBUF,
+		    (const char *)&bufsize, sizeof bufsize);
+		setsockopt(newfd, SOL_SOCKET, SO_RCVBUF,
+		    (const char *)&bufsize, sizeof bufsize);
+	}
+#endif
 
 #ifdef _WIN32
 	/*
