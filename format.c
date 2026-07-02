@@ -17,20 +17,30 @@
  */
 
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/wait.h>
+#endif
 
 #include <ctype.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <fnmatch.h>
 #include <libgen.h>
+#endif
 #include <math.h>
+#ifndef _WIN32
 #include <pwd.h>
+#endif
+#ifndef _WIN32
 #include <regex.h>
+#endif
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include "tmux.h"
 
@@ -4695,6 +4705,7 @@ format_window_name(struct format_expand_state *es, const char *fmt)
 	return (xstrdup("0"));
 }
 
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 /* Add neighbor window variables to the format tree. */
 static void
 format_add_window_neighbor(struct format_tree *nft, struct winlink *wl,
@@ -4726,6 +4737,8 @@ format_add_window_neighbor(struct format_tree *nft, struct winlink *wl,
 	}
 }
 
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 /* Loop over windows. */
 static char *
 format_loop_windows(struct format_expand_state *es, const char *fmt)

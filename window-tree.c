@@ -136,7 +136,10 @@ static enum sort_order window_tree_order_seq[] = {
 	SORT_INDEX,
 	SORT_NAME,
 	SORT_ACTIVITY,
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	SORT_Z,
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	SORT_END,
 };
 
@@ -875,6 +878,7 @@ window_tree_sort(struct sort_criteria *sort_crit)
 		sort_crit->order = sort_crit->order_seq[0];
 }
 
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 static const char* window_tree_help_lines[] = {
 	"\r\033[1m      Enter \033[0m\016x\017 \033[0mChoose selected item\n",
 	"\r\033[1m       S-Up \033[0m\016x\017 \033[0mSwap current and previous window\n",
@@ -899,6 +903,8 @@ window_tree_help(u_int *width, const char **item)
 	return (window_tree_help_lines);
 }
 
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 static struct screen *
 window_tree_init(struct window_mode_entry *wme, struct cmd_find_state *fs,
     struct args *args)
@@ -937,8 +943,13 @@ window_tree_init(struct window_mode_entry *wme, struct cmd_find_state *fs,
 
 	data->data = mode_tree_start(wp, args, window_tree_build,
 	    window_tree_draw, window_tree_search, window_tree_menu, NULL,
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	    window_tree_get_key, window_tree_swap, window_tree_sort,
 	    window_tree_help, data, window_tree_menu_items, &s);
+=======
+	    window_tree_get_key, window_tree_swap, window_tree_sort, data,
+	    window_tree_menu_items, &s);
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	mode_tree_zoom(data->data, args);
 
 	mode_tree_build(data->data);

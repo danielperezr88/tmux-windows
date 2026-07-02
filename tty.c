@@ -17,19 +17,22 @@
  */
 
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/ioctl.h>
-
 #include <netinet/in.h>
-
 #include <curses.h>
+#include <resolv.h>
+#include <termios.h>
+#endif
+
 #include <errno.h>
 #include <fcntl.h>
-#include <resolv.h>
 #include <stdlib.h>
 #include <string.h>
-#include <termios.h>
 #include <time.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include "tmux.h"
 
@@ -99,8 +102,10 @@ tty_create_log(void)
 int
 tty_init(struct tty *tty, struct client *c)
 {
+#ifndef _WIN32
 	if (!isatty(c->fd))
 		return (-1);
+#endif
 
 	memset(tty, 0, sizeof *tty);
 	tty->client = c;
@@ -110,14 +115,25 @@ tty_init(struct tty *tty, struct client *c)
 	tty->fg = tty->bg = -1;
 	tty->mouse_last_pane = -1;
 
+#ifndef _WIN32
 	if (tcgetattr(c->fd, &tty->tio) != 0)
 		return (-1);
+#endif
 	return (0);
 }
 
 void
 tty_resize(struct tty *tty)
 {
+#ifdef _WIN32
+	/*
+	 * On Windows, the server is a detached process with no console.
+	 * It cannot query the client's terminal size via GetStdHandle().
+	 * The client sends its dimensions via MSG_RESIZE, which are applied
+	 * directly via tty_set_size() in the MSG_RESIZE handler.
+	 */
+	return;
+#else
 	struct client	*c = tty->client;
 	struct winsize	 ws;
 	u_int		 sx, sy, xpixel, ypixel;
@@ -153,6 +169,7 @@ tty_resize(struct tty *tty)
 	    xpixel, ypixel);
 	tty_set_size(tty, sx, sy, xpixel, ypixel);
 	tty_invalidate(tty);
+#endif
 }
 
 void
@@ -172,6 +189,9 @@ tty_read_callback(__unused int fd, __unused short events, void *data)
 	const char	*name = c->name;
 	size_t		 size = EVBUFFER_LENGTH(tty->in);
 	int		 nread;
+
+	if (c->flags & CLIENT_DEAD)
+		return;
 
 	nread = evbuffer_read(tty->in, c->fd, -1);
 	if (nread == 0 || nread == -1) {
@@ -332,11 +352,16 @@ void
 tty_start_tty(struct tty *tty)
 {
 	struct client	*c = tty->client;
+#ifndef _WIN32
 	struct termios	 tio;
+#endif
 
 	setblocking(c->fd, 0);
 	event_add(&tty->event_in, NULL);
 
+#ifdef _WIN32
+	win32_tty_raw_mode();
+#else
 	memcpy(&tio, &tty->tio, sizeof tio);
 	tio.c_iflag &= ~(IXON|IXOFF|ICRNL|INLCR|IGNCR|IMAXBEL|ISTRIP);
 	tio.c_iflag |= IGNBRK;
@@ -347,6 +372,7 @@ tty_start_tty(struct tty *tty)
 	tio.c_cc[VTIME] = 0;
 	if (tcsetattr(c->fd, TCSANOW, &tio) == 0)
 		tcflush(c->fd, TCOFLUSH);
+#endif
 
 	tty_putcode(tty, TTYC_SMCUP);
 
@@ -435,7 +461,9 @@ void
 tty_stop_tty(struct tty *tty)
 {
 	struct client	*c = tty->client;
+#ifndef _WIN32
 	struct winsize	 ws;
+#endif
 
 	if (!(tty->flags & TTY_STARTED))
 		return;
@@ -455,12 +483,16 @@ tty_stop_tty(struct tty *tty)
 	 * because the fd is invalid. Things like ssh -t can easily leave us
 	 * with a dead tty.
 	 */
+#ifdef _WIN32
+	win32_tty_restore();
+	tty_raw(tty, tty_term_string_ii(tty->term, TTYC_CSR, 0, tty->sy - 1));
+#else
 	if (ioctl(c->fd, TIOCGWINSZ, &ws) == -1)
 		return;
 	if (tcsetattr(c->fd, TCSANOW, &tty->tio) == -1)
 		return;
-
 	tty_raw(tty, tty_term_string_ii(tty->term, TTYC_CSR, 0, ws.ws_row - 1));
+#endif
 	if (tty_acs_needed(tty))
 		tty_raw(tty, tty_term_string(tty->term, TTYC_RMACS));
 	tty_raw(tty, tty_term_string(tty->term, TTYC_SGR0));
@@ -559,16 +591,38 @@ tty_raw(struct tty *tty, const char *s)
 	ssize_t		 n, slen;
 	u_int		 i;
 
+	if (c->fd == -1)
+		return;
+
 	slen = strlen(s);
 	for (i = 0; i < 5; i++) {
+#ifdef _WIN32
+		/*
+		 * On Windows, c->fd is a Winsock socket (the tty channel).
+		 * Must use send() instead of write() which maps to _write()
+		 * and would invoke the CRT invalid parameter handler on a
+		 * non-CRT fd, calling abort().
+		 */
+		n = send((SOCKET)c->fd, s, slen, 0);
+		if (n == SOCKET_ERROR) {
+			if (WSAGetLastError() == WSAEWOULDBLOCK)
+				;  /* retry */
+			else
+				break;
+		} else {
+#else
 		n = write(c->fd, s, slen);
 		if (n >= 0) {
+#endif
 			s += n;
 			slen -= n;
 			if (slen == 0)
 				break;
-		} else if (n == -1 && errno != EAGAIN)
+		}
+#ifndef _WIN32
+		else if (n == -1 && errno != EAGAIN)
 			break;
+#endif
 		usleep(100);
 	}
 }
@@ -1176,9 +1230,12 @@ tty_clear_line(struct tty *tty, const struct grid_cell *defaults, u_int py,
     u_int px, u_int nx, u_int bg)
 {
 	struct client		*c = tty->client;
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	struct visible_ranges	*r;
 	struct visible_range	*rr;
 	u_int			 i;
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	log_debug("%s: %s, %u at %u,%u", __func__, c->name, nx, px, py);
 
@@ -1214,6 +1271,7 @@ tty_clear_line(struct tty *tty, const struct grid_cell *defaults, u_int py,
 	 * Couldn't use an escape sequence, use spaces. Clear only the visible
 	 * bit if there is an overlay.
 	 */
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	r = tty_check_overlay_range(tty, px, py, nx);
 	for (i = 0; i < r->used; i++) {
 		rr = &r->ranges[i];
@@ -1222,6 +1280,10 @@ tty_clear_line(struct tty *tty, const struct grid_cell *defaults, u_int py,
 			tty_repeat_space(tty, rr->nx);
 		}
 	}
+=======
+	tty_cursor(tty, px, py);
+	tty_repeat_space(tty, nx);
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 }
 
 /* Clear a line, adjusting to visible part of pane. */
@@ -1431,6 +1493,7 @@ tty_draw_pane(struct tty *tty, const struct tty_ctx *ctx, u_int py)
 	}
 }
 
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 void
 tty_cmd_redrawline(struct tty *tty, const struct tty_ctx *ctx)
 {
@@ -1453,6 +1516,8 @@ tty_cmd_redrawline(struct tty *tty, const struct tty_ctx *ctx)
 }
 
 /* Check if character needs to be mapped for codeset. */
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 const struct grid_cell *
 tty_check_codeset(struct tty *tty, const struct grid_cell *gc)
 {
@@ -2053,9 +2118,20 @@ tty_cmd_cell(struct tty *tty, const struct tty_ctx *ctx)
 	if (!tty_is_visible(tty, ctx, ctx->ocx, ctx->ocy, 1, 1))
 		return;
 
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (gcp->data.width == 1 && !tty_check_overlay(tty, px, py))
 		return;
 	if (gcp->data.width > 1) { /* could be partially obscured */
+=======
+	if (ctx->num == 2) {
+		tty_draw_line(tty, s, 0, s->cy, screen_size_x(s),
+		    ctx->xoff - ctx->wox, py, &ctx->defaults, ctx->palette);
+		return;
+	}
+
+	/* Handle partially obstructed wide characters. */
+	if (gcp->data.width > 1) {
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		r = tty_check_overlay_range(tty, px, py, gcp->data.width);
 		for (i = 0; i < r->used; i++)
 			vis += r->ranges[i].nx;
@@ -2087,7 +2163,11 @@ void
 tty_cmd_cells(struct tty *tty, const struct tty_ctx *ctx)
 {
 	struct visible_ranges	*r;
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	struct visible_range	*ri;
+=======
+	struct visible_range	*rr;
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	u_int			 i, px, py, cx;
 	const char		*cp = ctx->data.data;
 	size_t			 n = ctx->data.size;
@@ -2120,6 +2200,7 @@ tty_cmd_cells(struct tty *tty, const struct tty_ctx *ctx)
 	px = ctx->xoff + ctx->ocx - ctx->wox;
 	py = ctx->yoff + ctx->ocy - ctx->woy;
 
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	r = tty_check_overlay_range(tty, px, py, n);
 	for (i = 0; i < r->used; i++) {
 		ri = &r->ranges[i];
@@ -2127,6 +2208,15 @@ tty_cmd_cells(struct tty *tty, const struct tty_ctx *ctx)
 			cx = ri->px - ctx->xoff + ctx->wox;
 			tty_cursor_pane_unless_wrap(tty, ctx, cx, ctx->ocy);
 			tty_putn(tty, cp + ri->px - px, ri->nx, ri->nx);
+=======
+	r = tty_check_overlay_range(tty, px, py, ctx->num);
+	for (i = 0; i < r->used; i++) {
+		rr = &r->ranges[i];
+		if (rr->nx != 0) {
+			cx = rr->px - ctx->xoff + ctx->wox;
+			tty_cursor_pane_unless_wrap(tty, ctx, cx, ctx->ocy);
+			tty_putn(tty, cp + rr->px - px, rr->nx, rr->nx);
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		}
 	}
 }
@@ -3078,6 +3168,7 @@ tty_style_changed(struct window_pane *wp)
 }
 
 void
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 tty_default_colours(struct grid_cell *gc, struct window_pane *wp)
 {
 	if (wp->flags & PANE_STYLECHANGED)
@@ -3095,6 +3186,8 @@ tty_default_colours(struct grid_cell *gc, struct window_pane *wp)
 }
 
 void
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 tty_default_attributes(struct tty *tty, const struct grid_cell *defaults,
     struct colour_palette *palette, u_int bg, struct hyperlinks *hl)
 {
@@ -3123,6 +3216,7 @@ tty_clipboard_query(struct tty *tty)
 		tty->flags |= TTY_OSC52QUERY;
 		evtimer_add(&tty->clipboard_timer, &tv);
 	}
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 }
 
 void
@@ -3130,4 +3224,6 @@ tty_set_progress_bar(struct tty *tty, struct progress_bar *pb)
 {
 	if (tty_term_has(tty->term, TTYC_SPB))
 		tty_putcode_ii(tty, TTYC_SPB, pb->state, pb->progress);
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 }

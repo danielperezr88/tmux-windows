@@ -18,10 +18,14 @@
 
 #include <sys/types.h>
 
+#ifndef _WIN32
 #include <netinet/in.h>
+#endif
 
 #include <ctype.h>
+#ifndef _WIN32
 #include <resolv.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -64,7 +68,11 @@ struct input_request {
 
 	enum input_request_type		 type;
 	uint64_t			 t;
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	enum input_end_type		 end;
+=======
+	enum input_end_type              end;
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	int				 idx;
 	void				*data;
@@ -371,23 +379,37 @@ struct input_state {
 	{ 0x1b, 0x1b, NULL,		 &input_state_esc_enter }
 
 /* Forward declarations of state tables. */
-static const struct input_transition input_state_ground_table[];
-static const struct input_transition input_state_esc_enter_table[];
-static const struct input_transition input_state_esc_intermediate_table[];
-static const struct input_transition input_state_csi_enter_table[];
-static const struct input_transition input_state_csi_parameter_table[];
-static const struct input_transition input_state_csi_intermediate_table[];
-static const struct input_transition input_state_csi_ignore_table[];
-static const struct input_transition input_state_dcs_enter_table[];
-static const struct input_transition input_state_dcs_parameter_table[];
-static const struct input_transition input_state_dcs_intermediate_table[];
-static const struct input_transition input_state_dcs_handler_table[];
-static const struct input_transition input_state_dcs_escape_table[];
-static const struct input_transition input_state_dcs_ignore_table[];
-static const struct input_transition input_state_osc_string_table[];
-static const struct input_transition input_state_apc_string_table[];
-static const struct input_transition input_state_rename_string_table[];
-static const struct input_transition input_state_consume_st_table[];
+/*
+ * MSVC does not allow forward declarations of static arrays with unknown size.
+ * GCC and Clang treat these as tentative definitions, but MSVC requires extern.
+ * Use INPUT_TABLE_EXTERN for forward declarations and INPUT_TABLE_STATIC for
+ * definitions; on MSVC these expand to nothing (giving external linkage), while
+ * on other compilers they expand to static (preserving internal linkage).
+ */
+#ifdef _MSC_VER
+#define INPUT_TABLE_EXTERN	/* empty */
+#define INPUT_TABLE_STATIC	/* empty */
+#else
+#define INPUT_TABLE_EXTERN	static
+#define INPUT_TABLE_STATIC	static
+#endif
+INPUT_TABLE_EXTERN const struct input_transition input_state_ground_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_esc_enter_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_esc_intermediate_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_csi_enter_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_csi_parameter_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_csi_intermediate_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_csi_ignore_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_dcs_enter_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_dcs_parameter_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_dcs_intermediate_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_dcs_handler_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_dcs_escape_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_dcs_ignore_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_osc_string_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_apc_string_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_rename_string_table[];
+INPUT_TABLE_EXTERN const struct input_transition input_state_consume_st_table[];
 
 /* ground state definition. */
 static const struct input_state input_state_ground = {
@@ -509,7 +531,7 @@ static const struct input_state input_state_consume_st = {
 };
 
 /* ground state table. */
-static const struct input_transition input_state_ground_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_ground_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, input_c0_dispatch, NULL },
@@ -523,7 +545,7 @@ static const struct input_transition input_state_ground_table[] = {
 };
 
 /* esc_enter state table. */
-static const struct input_transition input_state_esc_enter_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_esc_enter_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, input_c0_dispatch,  NULL },
@@ -550,7 +572,7 @@ static const struct input_transition input_state_esc_enter_table[] = {
 };
 
 /* esc_intermediate state table. */
-static const struct input_transition input_state_esc_intermediate_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_esc_intermediate_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, input_c0_dispatch,  NULL },
@@ -564,7 +586,7 @@ static const struct input_transition input_state_esc_intermediate_table[] = {
 };
 
 /* csi_enter state table. */
-static const struct input_transition input_state_csi_enter_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_csi_enter_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, input_c0_dispatch,  NULL },
@@ -582,7 +604,7 @@ static const struct input_transition input_state_csi_enter_table[] = {
 };
 
 /* csi_parameter state table. */
-static const struct input_transition input_state_csi_parameter_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_csi_parameter_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, input_c0_dispatch,  NULL },
@@ -600,7 +622,7 @@ static const struct input_transition input_state_csi_parameter_table[] = {
 };
 
 /* csi_intermediate state table. */
-static const struct input_transition input_state_csi_intermediate_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_csi_intermediate_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, input_c0_dispatch,  NULL },
@@ -615,7 +637,7 @@ static const struct input_transition input_state_csi_intermediate_table[] = {
 };
 
 /* csi_ignore state table. */
-static const struct input_transition input_state_csi_ignore_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_csi_ignore_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, input_c0_dispatch, NULL },
@@ -629,7 +651,7 @@ static const struct input_transition input_state_csi_ignore_table[] = {
 };
 
 /* dcs_enter state table. */
-static const struct input_transition input_state_dcs_enter_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_dcs_enter_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, NULL,		  NULL },
@@ -647,7 +669,7 @@ static const struct input_transition input_state_dcs_enter_table[] = {
 };
 
 /* dcs_parameter state table. */
-static const struct input_transition input_state_dcs_parameter_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_dcs_parameter_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, NULL,		  NULL },
@@ -665,7 +687,7 @@ static const struct input_transition input_state_dcs_parameter_table[] = {
 };
 
 /* dcs_intermediate state table. */
-static const struct input_transition input_state_dcs_intermediate_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_dcs_intermediate_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, NULL,		  NULL },
@@ -680,7 +702,7 @@ static const struct input_transition input_state_dcs_intermediate_table[] = {
 };
 
 /* dcs_handler state table. */
-static const struct input_transition input_state_dcs_handler_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_dcs_handler_table[] = {
 	/* No INPUT_STATE_ANYWHERE */
 
 	{ 0x00, 0x1a, input_input,  NULL },
@@ -691,7 +713,7 @@ static const struct input_transition input_state_dcs_handler_table[] = {
 };
 
 /* dcs_escape state table. */
-static const struct input_transition input_state_dcs_escape_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_dcs_escape_table[] = {
 	/* No INPUT_STATE_ANYWHERE */
 
 	{ 0x00, 0x5b, input_input,	  &input_state_dcs_handler },
@@ -702,7 +724,7 @@ static const struct input_transition input_state_dcs_escape_table[] = {
 };
 
 /* dcs_ignore state table. */
-static const struct input_transition input_state_dcs_ignore_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_dcs_ignore_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, NULL,	    NULL },
@@ -714,7 +736,7 @@ static const struct input_transition input_state_dcs_ignore_table[] = {
 };
 
 /* osc_string state table. */
-static const struct input_transition input_state_osc_string_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_osc_string_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x06, NULL,	     NULL },
@@ -728,7 +750,7 @@ static const struct input_transition input_state_osc_string_table[] = {
 };
 
 /* apc_string state table. */
-static const struct input_transition input_state_apc_string_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_apc_string_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, NULL,	    NULL },
@@ -740,7 +762,7 @@ static const struct input_transition input_state_apc_string_table[] = {
 };
 
 /* rename_string state table. */
-static const struct input_transition input_state_rename_string_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_rename_string_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, NULL,	    NULL },
@@ -752,7 +774,7 @@ static const struct input_transition input_state_rename_string_table[] = {
 };
 
 /* consume_st state table. */
-static const struct input_transition input_state_consume_st_table[] = {
+INPUT_TABLE_STATIC const struct input_transition input_state_consume_st_table[] = {
 	INPUT_STATE_ANYWHERE,
 
 	{ 0x00, 0x17, NULL,	    NULL },
@@ -1962,6 +1984,14 @@ input_csi_dispatch_rm_private(struct input_ctx *ictx)
 			screen_write_mode_clear(sctx, MODE_THEME_UPDATES);
 			if (ictx->wp != NULL)
 				ictx->wp->flags &= ~PANE_THEMECHANGED;
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
+=======
+			break;
+		case 2026:	/* synchronized output */
+			screen_write_stop_sync(ictx->wp);
+			if (ictx->wp != NULL)
+				ictx->wp->flags |= PANE_REDRAW;
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 			break;
 		default:
 			log_debug("%s: unknown '%c'", __func__, ictx->ch);
@@ -2065,7 +2095,11 @@ input_csi_dispatch_sm_private(struct input_ctx *ictx)
 				ictx->wp->flags &= ~PANE_THEMECHANGED;
 			}
 			break;
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 		case 2026:
+=======
+		case 2026:	/* synchronized output */
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 			screen_write_start_sync(ictx->wp);
 			break;
 		default:
@@ -3192,9 +3226,14 @@ input_osc_133(struct input_ctx *ictx, const char *p)
 
 /* Handle OSC 52 reply. */
 static void
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 input_osc_52_reply(struct input_ctx *ictx, char clip)
 {
 	struct bufferevent	*ev = ictx->event;
+=======
+input_osc_52_reply(struct input_ctx *ictx)
+{
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	struct paste_buffer	*pb;
 	int			 state;
 	const char		*buf;
@@ -3208,9 +3247,15 @@ input_osc_52_reply(struct input_ctx *ictx, char clip)
 			return;
 		buf = paste_buffer_data(pb, &len);
 		if (ictx->input_end == INPUT_END_BEL)
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 			input_reply_clipboard(ev, buf, len, "\007", clip);
 		else
 			input_reply_clipboard(ev, buf, len, "\033\\", clip);
+=======
+			input_reply_clipboard(ictx->event, buf, len, "\007");
+		else
+			input_reply_clipboard(ictx->event, buf, len, "\033\\");
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		return;
 	}
 	input_add_request(ictx, INPUT_REQUEST_CLIPBOARD, ictx->input_end);
@@ -3223,7 +3268,11 @@ input_osc_52_reply(struct input_ctx *ictx, char clip)
  */
 static int
 input_osc_52_parse(struct input_ctx *ictx, const char *p, u_char **out,
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
     int *outlen, char *clip)
+=======
+    int *outlen, char *flags)
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 {
 	char		*end;
 	size_t		 len;
@@ -3247,7 +3296,11 @@ input_osc_52_parse(struct input_ctx *ictx, const char *p, u_char **out,
 	log_debug("%s: %.*s %s", __func__, (int)(end - p - 1), p, clip);
 
 	if (strcmp(end, "?") == 0) {
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 		input_osc_52_reply(ictx, *clip);
+=======
+		input_osc_52_reply(ictx);
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		return (0);
 	}
 
@@ -3270,12 +3323,21 @@ static void
 input_osc_52(struct input_ctx *ictx, const char *p)
 {
 	struct window_pane	*wp = ictx->wp;
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	struct screen_write_ctx	 ctx;
 	u_char			*out;
 	int			 outlen;
 	char			 clip[sizeof "cpqs01234567"] = "";
 
 	if (!input_osc_52_parse(ictx, p, &out, &outlen, clip))
+=======
+	struct screen_write_ctx  ctx;
+	u_char			*out;
+	int			 outlen;
+	char			 flags[sizeof "cpqs01234567"] = "";
+
+	if (!input_osc_52_parse(ictx, p, &out, &outlen, flags))
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		return;
 
 	if (wp == NULL) {
@@ -3284,16 +3346,28 @@ input_osc_52(struct input_ctx *ictx, const char *p)
 			free(out);
 			return;
 		}
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 		tty_set_selection(&ictx->c->tty, clip, out, outlen);
+=======
+		tty_set_selection(&ictx->c->tty, flags, out, outlen);
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		paste_add(NULL, out, outlen);
 	} else {
 		/* Normal window. */
 		screen_write_start_pane(&ctx, wp, NULL);
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 		screen_write_setselection(&ctx, clip, out, outlen);
+=======
+		screen_write_setselection(&ctx, flags, out, outlen);
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		screen_write_stop(&ctx);
 		notify_pane("pane-set-clipboard", wp);
 		paste_add(NULL, out, outlen);
 	}
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
+=======
+	free(out);
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 }
 
 /* Handle the OSC 104 sequence for unsetting (multiple) palette entries. */
@@ -3497,7 +3571,10 @@ static void
 input_request_clipboard_reply(struct input_request *ir, void *data)
 {
 	struct input_ctx			*ictx = ir->ictx;
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	struct bufferevent			*ev = ictx->event;
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	struct input_request_clipboard_data	*cd = data;
 	int					 state;
 	char					*copy;
@@ -3512,9 +3589,15 @@ input_request_clipboard_reply(struct input_request *ir, void *data)
 	}
 
 	if (ir->idx == INPUT_END_BEL)
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 		input_reply_clipboard(ev, cd->buf, cd->len, "\007", cd->clip);
 	else
 		input_reply_clipboard(ev, cd->buf, cd->len, "\033\\", cd->clip);
+=======
+		input_reply_clipboard(ictx->event, cd->buf, cd->len, "\007");
+	else
+		input_reply_clipboard(ictx->event, cd->buf, cd->len, "\033\\");
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 }
 
 /* Handle a reply to a request. */

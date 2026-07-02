@@ -17,7 +17,9 @@
  */
 
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 
 #include <errno.h>
 #include <limits.h>
@@ -25,7 +27,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include "tmux.h"
 
@@ -880,9 +884,15 @@ status_prompt_redraw(struct client *c)
 	n = options_get_number(s->options, "prompt-cursor-colour");
 	sl->active->default_ccolour = n;
 	if (c->prompt_mode == PROMPT_COMMAND)
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 		n = options_get_number(oo, "prompt-command-cursor-style");
 	else
 		n = options_get_number(oo, "prompt-cursor-style");
+=======
+		n = options_get_number(s->options, "prompt-command-cursor-style");
+	else
+		n = options_get_number(s->options, "prompt-cursor-style");
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	screen_set_cursor_style(n, &sl->active->default_cstyle,
 	    &sl->active->default_mode);
 
@@ -1101,7 +1111,10 @@ status_prompt_translate_key(struct client *c, key_code key, key_code *new_key)
 		c->flags |= CLIENT_REDRAWSTATUS;
 		return (0);
 	case '\033': /* Escape */
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	case '['|KEYC_CTRL:
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		return (0);
 	}
 

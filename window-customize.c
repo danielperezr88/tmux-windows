@@ -912,8 +912,13 @@ window_customize_init(struct window_mode_entry *wme, struct cmd_find_state *fs,
 
 	data->data = mode_tree_start(wp, args, window_customize_build,
 	    window_customize_draw, NULL, window_customize_menu,
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	    window_customize_height, NULL, NULL, NULL, window_customize_help,
 	    data, window_customize_menu_items, &s);
+=======
+	    window_customize_height, NULL, NULL, NULL, data,
+	    window_customize_menu_items, &s);
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	mode_tree_zoom(data->data, args);
 
 	mode_tree_build(data->data);

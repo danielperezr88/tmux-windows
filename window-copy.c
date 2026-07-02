@@ -19,7 +19,9 @@
 #include <sys/types.h>
 
 #include <ctype.h>
+#ifndef _WIN32
 #include <regex.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -52,12 +54,15 @@ static void	window_copy_redraw_lines(struct window_mode_entry *, u_int,
 		    u_int);
 static void	window_copy_redraw_screen(struct window_mode_entry *);
 static void	window_copy_style_changed(struct window_mode_entry *);
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 static int	window_copy_line_number_mode(struct window_mode_entry *);
 static int	window_copy_line_number_is_absolute(struct window_mode_entry *);
 static int	window_copy_line_numbers_active(struct window_mode_entry *);
 static u_int	window_copy_line_number_width(struct window_mode_entry *);
 static u_int	window_copy_cursor_offset(struct window_mode_entry *, u_int, u_int);
 static u_int	window_copy_cursor_unoffset(struct window_mode_entry *, u_int, u_int);
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 static void	window_copy_write_line(struct window_mode_entry *,
 		    struct screen_write_ctx *, u_int);
 static void	window_copy_write_lines(struct window_mode_entry *,
@@ -1556,11 +1561,16 @@ window_copy_cmd_scroll_to_mouse(struct window_copy_cmd_state *cs)
 	struct client			*c = cs->c;
 	struct mouse_event		*m = cs->m;
 	int				 scroll_exit = args_has(cs->wargs, 'e');
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	u_int				 tty_ox, tty_oy, tty_sx, tty_sy;
 
 	tty_window_offset(&c->tty, &tty_ox, &tty_oy, &tty_sx, &tty_sy);
 	window_copy_scroll(wp, c->tty.mouse_slider_mpos, m->y, tty_oy,
 	    scroll_exit);
+=======
+
+	window_copy_scroll(wp, c->tty.mouse_slider_mpos, m->y, scroll_exit);
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	return (WINDOW_COPY_CMD_NOTHING);
 }
 
@@ -2805,9 +2815,13 @@ window_copy_cmd_refresh_from_pane(struct window_copy_cmd_state *cs)
 	data->backing = window_copy_clone_screen(&wp->base, &data->screen, NULL,
 	    NULL, wme->swp != wme->wp);
 
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (oy_from_top <= screen_hsize(data->backing))
 		data->oy = screen_hsize(data->backing) - oy_from_top;
 	else {
+=======
+	if (data->oy > screen_hsize(data->backing)) {
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		data->cy = 0;
 		data->oy = screen_hsize(data->backing);
 	}
@@ -3327,7 +3341,10 @@ static const struct {
 	},
 	{ .command = "scroll-to-mouse",
 	  .args = { "e", 0, 0, NULL },
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	  .flags = WINDOW_COPY_CMD_FLAG_READONLY,
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	  .clear = WINDOW_COPY_CMD_CLEAR_EMACS_ONLY,
 	  .f = window_copy_cmd_scroll_to_mouse
 	},

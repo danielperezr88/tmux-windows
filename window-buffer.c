@@ -23,7 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include "tmux.h"
 
@@ -329,6 +331,7 @@ window_buffer_sort(struct sort_criteria *sort_crit)
 		sort_crit->order = sort_crit->order_seq[0];
 }
 
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 static const char* window_buffer_help_lines[] = {
 	"\r\033[1m      Enter \033[0m\016x\017 \033[0mPaste selected %1\n",
 	"\r\033[1m          p \033[0m\016x\017 \033[0mPaste selected %1\n",
@@ -348,6 +351,8 @@ window_buffer_help(u_int *width, const char **item)
 	return (window_buffer_help_lines);
 }
 
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 static struct screen *
 window_buffer_init(struct window_mode_entry *wme, struct cmd_find_state *fs,
     struct args *args)
@@ -375,8 +380,13 @@ window_buffer_init(struct window_mode_entry *wme, struct cmd_find_state *fs,
 
 	data->data = mode_tree_start(wp, args, window_buffer_build,
 	    window_buffer_draw, window_buffer_search, window_buffer_menu, NULL,
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	    window_buffer_get_key, NULL, window_buffer_sort, window_buffer_help,
 	    data, window_buffer_menu_items, &s);
+=======
+	    window_buffer_get_key, NULL, window_buffer_sort, data,
+	    window_buffer_menu_items, &s);
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	mode_tree_zoom(data->data, args);
 
 	mode_tree_build(data->data);

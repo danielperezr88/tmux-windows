@@ -17,12 +17,18 @@
  */
 
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/wait.h>
+#endif
 
+#ifndef _WIN32
 #include <signal.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include "tmux.h"
 
@@ -66,7 +72,7 @@ struct popup_data {
 	u_int			  psx;
 	u_int			  psy;
 
-	enum { OFF, MOVE, SIZE }  dragging;
+	enum { OFF, MOVE, DRAG_SIZE }  dragging;
 	u_int			  dx;
 	u_int			  dy;
 
@@ -104,6 +110,7 @@ static const struct menu_item popup_internal_menu_items[] = {
 };
 
 static void
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 popup_free(struct popup_data *pd)
 {
 	server_client_unref(pd->c);
@@ -125,6 +132,8 @@ popup_free(struct popup_data *pd)
 }
 
 static void
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 popup_reapply_styles(struct popup_data *pd)
 {
 	struct client		*c = pd->c;
@@ -364,8 +373,27 @@ popup_free_cb(struct client *c, void *data)
 			cmdq_get_client(item)->retval = pd->status;
 		cmdq_continue(item);
 	}
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 
 	popup_free(pd);
+=======
+	server_client_unref(pd->c);
+
+	if (pd->job != NULL)
+		job_free(pd->job);
+	input_free(pd->ictx);
+
+	free(pd->or[0].ranges);
+	free(pd->or[1].ranges);
+	free(pd->r.ranges);
+	screen_free(&pd->s);
+	colour_palette_free(&pd->palette);
+
+	free(pd->title);
+	free(pd->style);
+	free(pd->border_style);
+	free(pd);
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 }
 
 static void
@@ -527,7 +555,7 @@ popup_handle_drag(struct client *c, struct popup_data *pd,
 		pd->ppx = px;
 		pd->ppy = py;
 		server_redraw_client(c);
-	} else if (pd->dragging == SIZE) {
+	} else if (pd->dragging == DRAG_SIZE) {
 		if (pd->border_lines == BOX_LINES_NONE) {
 			if (m->x < pd->px + 1)
 				return;
@@ -613,7 +641,7 @@ popup_key_cb(struct client *c, void *data, struct key_event *event)
 			if (MOUSE_BUTTONS(m->lb) == MOUSE_BUTTON_1)
 				pd->dragging = MOVE;
 			else if (MOUSE_BUTTONS(m->lb) == MOUSE_BUTTON_3)
-				pd->dragging = SIZE;
+				pd->dragging = DRAG_SIZE;
 			pd->dx = m->lx - pd->px;
 			pd->dy = m->ly - pd->py;
 			goto out;
@@ -858,6 +886,7 @@ popup_display(int flags, enum box_lines lines, struct cmdq_item *item, u_int px,
 	pd->psx = sx;
 	pd->psy = sy;
 
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (flags & POPUP_NOJOB)
 		pd->ictx = input_init(NULL, NULL, &pd->palette, NULL);
 	else {
@@ -871,6 +900,12 @@ popup_display(int flags, enum box_lines lines, struct cmdq_item *item, u_int px,
 		pd->ictx = input_init(NULL, job_get_event(pd->job),
 		    &pd->palette, c);
 	}
+=======
+	pd->job = job_run(shellcmd, argc, argv, env, s, cwd,
+	    popup_job_update_cb, popup_job_complete_cb, NULL, pd,
+	    JOB_NOWAIT|JOB_PTY|JOB_KEEPWRITE|JOB_DEFAULTSHELL, jx, jy);
+	pd->ictx = input_init(NULL, job_get_event(pd->job), &pd->palette, c);
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	server_client_set_overlay(c, 0, popup_check_cb, popup_mode_cb,
 	    popup_draw_cb, popup_key_cb, popup_free_cb, popup_resize_cb, pd);

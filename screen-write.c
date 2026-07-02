@@ -27,8 +27,11 @@ static struct screen_write_citem *screen_write_collect_trim(
 		    struct screen_write_ctx *, u_int, u_int, u_int, int *);
 static void	screen_write_collect_insert(struct screen_write_ctx *,
 		    struct screen_write_citem *);
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 static void	screen_write_collect_insert_clear(struct screen_write_ctx *,
 		    u_int, u_int, u_int);
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 static void	screen_write_collect_clear(struct screen_write_ctx *, u_int,
 		    u_int);
 static void	screen_write_collect_scroll(struct screen_write_ctx *, u_int);
@@ -1001,6 +1004,11 @@ screen_write_stop_sync(struct window_pane *wp)
 		evtimer_del(&wp->sync_timer);
 	wp->base.mode &= ~MODE_SYNC;
 
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
+=======
+	wp->flags |= PANE_REDRAW;
+
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	log_debug("%s: %%%u stopped sync mode", __func__, wp->id);
 }
 
@@ -2264,6 +2272,28 @@ screen_write_collect_flush(struct screen_write_ctx *ctx, int scroll_only,
 	u_int				 y, cx, cy, items = 0;
 	struct screen_write_citem	*ci, *tmp;
 	struct screen_write_cline	*cl;
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
+=======
+	u_int				 y, cx, cy, last, items = 0;
+	struct tty_ctx			 ttyctx;
+
+	if (s->mode & MODE_SYNC) {
+		for (y = 0; y < screen_size_y(s); y++) {
+			cl = &ctx->s->write_list[y];
+			TAILQ_FOREACH_SAFE(ci, &cl->items, entry, tmp) {
+				TAILQ_REMOVE(&cl->items, ci, entry);
+				screen_write_free_citem(ci);
+			}
+		}
+		return;
+	}
+
+	if (ctx->scrolled != 0) {
+		log_debug("%s: scrolled %u (region %u-%u)", __func__,
+		    ctx->scrolled, s->rupper, s->rlower);
+		if (ctx->scrolled > s->rlower - s->rupper + 1)
+			ctx->scrolled = s->rlower - s->rupper + 1;
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	if (s->mode & MODE_SYNC)
 		goto discard;
@@ -2290,6 +2320,31 @@ discard:
 	for (y = 0; y < screen_size_y(s); y++) {
 		cl = &s->write_list[y];
 		TAILQ_FOREACH_SAFE(ci, &cl->items, entry, tmp) {
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
+=======
+			log_debug("collect list: x=%u (last %u), y=%u, used=%u",
+			    ci->x, last, y, ci->used);
+			if (last != UINT_MAX && ci->x <= last) {
+				fatalx("collect list not in order: %u <= %u",
+				    ci->x, last);
+			}
+			screen_write_set_cursor(ctx, ci->x, y);
+			if (ci->type == CLEAR) {
+				screen_write_initctx(ctx, &ttyctx, 1);
+				ttyctx.bg = ci->bg;
+				ttyctx.num = ci->used;
+				tty_write(tty_cmd_clearcharacter, &ttyctx);
+			} else {
+				screen_write_initctx(ctx, &ttyctx, 0);
+				ttyctx.cell = &ci->gc;
+				ttyctx.wrapped = ci->wrapped;
+				ttyctx.ptr = cl->data + ci->x;
+				ttyctx.num = ci->used;
+				tty_write(tty_cmd_cells, &ttyctx);
+			}
+			items++;
+
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 			TAILQ_REMOVE(&cl->items, ci, entry);
 			screen_write_free_citem(ci);
 		}
@@ -2330,6 +2385,24 @@ screen_write_collect_insert_clear(struct screen_write_ctx *ctx, u_int px,
 		ci->bg = bg;
 		screen_write_collect_insert(ctx, ci);
 	}
+}
+
+/* Insert an item on current line. */
+void
+screen_write_collect_insert(struct screen_write_ctx *ctx,
+    struct screen_write_citem *ci)
+{
+	struct screen			*s = ctx->s;
+	struct screen_write_cline	*cl = &s->write_list[s->cy];
+	struct screen_write_citem	*before;
+
+	before = screen_write_collect_trim(ctx, s->cy, ci->x, ci->used,
+	    &ci->wrapped);
+	if (before == NULL)
+		TAILQ_INSERT_TAIL(&cl->items, ci, entry);
+	else
+		TAILQ_INSERT_BEFORE(before, ci, entry);
+	ctx->item = screen_write_get_citem();
 }
 
 /* Finish and store collected cells. */
@@ -2481,11 +2554,16 @@ screen_write_cell(struct screen_write_ctx *ctx, const struct grid_cell *gc)
 	struct grid_cell	 tmp_gc, now_gc;
 	struct tty_ctx		 ttyctx;
 	u_int			 sx = screen_size_x(s), sy = screen_size_y(s);
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	u_int			 width = ud->width, xx, not_wrap, i, n, vis;
 	int			 selected, skip = 1, redraw = 0;
 	int			 yoff = 0, xoff = 0;
 	struct visible_ranges	*r;
 	struct visible_range	*ri;
+=======
+	u_int		 	 width = ud->width, xx, not_wrap;
+	int			 selected, skip = 1, redraw = 0;
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	/* Ignore padding cells. */
 	if (gc->flags & GRID_FLAG_PADDING)
@@ -2608,6 +2686,7 @@ screen_write_cell(struct screen_write_ctx *ctx, const struct grid_cell *gc)
 		tty_write(tty_cmd_insertcharacter, &ttyctx);
 	}
 
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	/* If not writing, done now. */
 	if (skip || s->mode & MODE_SYNC)
 		return;
@@ -2629,6 +2708,16 @@ screen_write_cell(struct screen_write_ctx *ctx, const struct grid_cell *gc)
 	for (i = 0, vis = 0; i < r->used; i++)
 		vis += r->ranges[i].nx;
 	if (vis >= width) {
+=======
+	/* Write to the screen. */
+	if (!skip && !(s->mode & MODE_SYNC)) {
+		if (selected) {
+			screen_select_cell(s, &tmp_gc, gc);
+			ttyctx.cell = &tmp_gc;
+		} else
+			ttyctx.cell = gc;
+		ttyctx.num = redraw ? 2 : 0;
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		tty_write(tty_cmd_cell, &ttyctx);
 		return;
 	}

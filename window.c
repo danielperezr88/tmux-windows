@@ -17,19 +17,29 @@
  */
 
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/ioctl.h>
+#endif
 
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#ifndef _WIN32
 #include <fnmatch.h>
+#endif
+#ifndef _WIN32
 #include <regex.h>
+#endif
+#ifndef _WIN32
 #include <signal.h>
+#endif
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include "tmux.h"
 
@@ -373,10 +383,23 @@ window_pane_destroy_ready(struct window_pane *wp)
 {
 	int	n;
 
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (wp->pipe_fd != -1 && EVBUFFER_LENGTH(wp->pipe_event->output) != 0)
 		return (0);
 	if (ioctl(wp->fd, FIONREAD, &n) != -1 && n > 0)
 		return (0);
+=======
+	if (wp->pipe_fd != -1) {
+		if (EVBUFFER_LENGTH(wp->pipe_event->output) != 0)
+			return (0);
+#ifdef _WIN32
+		/* On Windows, skip FIONREAD ioctl (not applicable to sockets here). */
+#else
+		if (ioctl(wp->fd, FIONREAD, &n) != -1 && n > 0)
+			return (0);
+#endif
+	}
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	if (~wp->flags & PANE_EXITED)
 		return (0);
@@ -443,6 +466,11 @@ window_pane_send_resize(struct window_pane *wp, u_int sx, u_int sy)
 
 	log_debug("%s: %%%u resize to %u,%u", __func__, wp->id, sx, sy);
 
+#ifdef _WIN32
+	if (wp->win32_pty != NULL)
+		win32_pty_resize((struct win32_pty *)wp->win32_pty,
+		    (int)sx, (int)sy);
+#else
 	memset(&ws, 0, sizeof ws);
 	ws.ws_col = sx;
 	ws.ws_row = sy;
@@ -459,6 +487,7 @@ window_pane_send_resize(struct window_pane *wp, u_int sx, u_int sy)
 		if (errno != EINVAL && errno != ENXIO)
 #endif
 		fatal("ioctl failed");
+#endif
 }
 
 int
@@ -1085,12 +1114,27 @@ window_pane_create(struct window *w, u_int sx, u_int sy, u_int hlimit)
 }
 
 static void
+window_pane_free_modes(struct window_pane *wp)
+{
+	struct window_mode_entry	*wme;
+
+	while (!TAILQ_EMPTY(&wp->modes)) {
+		wme = TAILQ_FIRST(&wp->modes);
+		TAILQ_REMOVE(&wp->modes, wme, entry);
+		wme->mode->free(wme);
+		free(wme);
+	}
+
+	wp->screen = &wp->base;
+}
+
+static void
 window_pane_destroy(struct window_pane *wp)
 {
 	struct window_pane_resize	*r;
 	struct window_pane_resize	*r1;
 
-	window_pane_reset_mode_all(wp);
+	window_pane_free_modes(wp);
 	free(wp->searchstr);
 
 	if (wp->fd != -1) {
@@ -1099,6 +1143,13 @@ window_pane_destroy(struct window_pane *wp)
 		kill(getpid(), SIGCHLD);
 #endif
 		bufferevent_free(wp->event);
+#ifdef _WIN32
+		if (wp->win32_pty != NULL) {
+			win32_pty_close((struct win32_pty *)wp->win32_pty);
+			wp->win32_pty = NULL;
+			wp->fd = -1;
+		} else
+#endif
 		close(wp->fd);
 	}
 	if (wp->ictx != NULL)
@@ -1361,6 +1412,12 @@ window_pane_key(struct window_pane *wp, struct client *c, struct session *s,
 
 	wme = TAILQ_FIRST(&wp->modes);
 	if (wme != NULL) {
+		/*
+		 * No mode uses mouse motion events, so drop them here rather
+		 * than passing them on and causing a redraw on every movement.
+		 */
+		if (KEYC_IS_TYPE(key, KEYC_TYPE_MOUSEMOVE))
+			return (0);
 		if (wme->mode->key != NULL && c != NULL) {
 			key &= ~KEYC_MASK_FLAGS;
 			wme->mode->key(wme, c, s, wl, key, m);
@@ -1897,8 +1954,11 @@ window_pane_mode(struct window_pane *wp)
 int
 window_pane_show_scrollbar(struct window_pane *wp)
 {
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	struct window	*w = wp->window;
 
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	if (SCREEN_IS_ALTERNATE(&wp->base))
 		return (0);
 	if (w->sb == PANE_SCROLLBARS_ALWAYS ||
@@ -2080,6 +2140,7 @@ window_pane_send_theme_update(struct window_pane *wp)
 		log_debug("%s: %%%u unknown theme", __func__, wp->id);
 		break;
 	}
+<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 }
 
 struct style_range *
@@ -2120,4 +2181,6 @@ window_pane_is_floating(struct window_pane *wp)
 	if (lc == NULL || (lc->flags & LAYOUT_CELL_FLOATING) == 0)
 		return (0);
 	return (1);
+=======
+>>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 }
