@@ -22,3 +22,10 @@ fuzz/*-fuzzer
 tags
 tmux
 tmux.1.*
+
+# Windows build artifacts
+build/
+backups/
+.omo/
+.sisyphus/
+TODO.md
