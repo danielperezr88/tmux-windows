@@ -151,13 +151,26 @@ struct winlink;
 #define KEYC_SENT	     0x40000000000000ULL
 
 /* Masks for key bits. */
+#ifdef _WIN32
+/*
+ * MSVC truncates enum values to 32-bit int. Shift type bits to position 16
+ * so enum values fit in int. Key values (offsets) use bits 0-15 which is
+ * sufficient for ~350 defined key codes.
+ */
+#define KEYC_MASK_TYPE       0x0000000000ff0000ULL
+#define KEYC_MASK_MODIFIERS  0x00ff0000000000ULL
+#define KEYC_MASK_FLAGS      0xff000000000000ULL
+#define KEYC_MASK_KEY        0x000000000000ffffULL
+#define KEYC_SHIFT_TYPE(t)   ((unsigned long long)(t) << 16)
+#else
 #define KEYC_MASK_TYPE       0x0000ff00000000ULL
 #define KEYC_MASK_MODIFIERS  0x00ff0000000000ULL
 #define KEYC_MASK_FLAGS      0xff000000000000ULL
 #define KEYC_MASK_KEY        0x0000ffffffffffULL
+#define KEYC_SHIFT_TYPE(t)   ((unsigned long long)(t) << 32)
+#endif
 
 #define KEYC_NUSER           1000
-#define KEYC_SHIFT_TYPE(t)   ((unsigned long long)(t) << 32)
 #define KEYC_IS_TYPE(k, t)   (((k) & KEYC_MASK_TYPE) == KEYC_SHIFT_TYPE(t))
 enum key_code_type {
 	KEYC_TYPE_UNICODE,
@@ -1630,19 +1643,6 @@ struct key_event {
 
 	char			*buf;
 	size_t			 len;
-};
-
-/* Visible range array element. */
-struct visible_range {
-	u_int	px;	/* start */
-	u_int	nx;	/* length */
-};
-
-/* Visible areas not obstructed. */
-struct visible_ranges {
-	struct visible_range	*ranges;  /* dynamically allocated array */
-	u_int			 used;    /* number of entries in ranges */
-	u_int			 size;    /* allocated capacity of ranges */
 };
 
 /* Terminal definition. */

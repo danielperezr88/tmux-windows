@@ -385,8 +385,12 @@ window_pane_destroy_ready(struct window_pane *wp)
 
 	if (wp->pipe_fd != -1 && EVBUFFER_LENGTH(wp->pipe_event->output) != 0)
 		return (0);
+#ifdef _WIN32
+	/* On Windows, skip FIONREAD ioctl (not applicable to sockets here). */
+#else
 	if (ioctl(wp->fd, FIONREAD, &n) != -1 && n > 0)
 		return (0);
+#endif
 
 	if (~wp->flags & PANE_EXITED)
 		return (0);

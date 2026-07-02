@@ -178,6 +178,7 @@ parse_window_name(const char *in)
 #else
 	if (*name == '/')
 		name = basename(name);
+#endif
 	name = clean_name(name, 0);
 	free(copy);
 	if (name == NULL)

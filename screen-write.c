@@ -2298,24 +2298,6 @@ discard:
 	ctx->bg = 8;
 }
 
-/* Insert an item on current line. */
-static void
-screen_write_collect_insert(struct screen_write_ctx *ctx,
-    struct screen_write_citem *ci)
-{
-	struct screen			*s = ctx->s;
-	struct screen_write_cline	*cl = &s->write_list[s->cy];
-	struct screen_write_citem	*before;
-
-	before = screen_write_collect_trim(ctx, s->cy, ci->x, ci->used,
-	    &ci->wrapped);
-	if (before == NULL)
-		TAILQ_INSERT_TAIL(&cl->items, ci, entry);
-	else
-		TAILQ_INSERT_BEFORE(before, ci, entry);
-	ctx->item = screen_write_get_citem();
-}
-
 /* Insert a clear for part of a line. */
 static void
 screen_write_collect_insert_clear(struct screen_write_ctx *ctx, u_int px,
