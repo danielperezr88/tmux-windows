@@ -1208,10 +1208,7 @@ struct input_request_palette_data {
 struct input_request_clipboard_data {
 	char	*buf;
 	size_t	 len;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	char	 clip;
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 };
 
 /* Request sent to client on behalf of pane. */
@@ -1244,7 +1241,6 @@ enum client_theme {
 	THEME_DARK
 };
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 /* Visible range array element. */
 struct visible_range {
 	u_int	px;	/* start */
@@ -1258,8 +1254,6 @@ struct visible_ranges {
 	u_int			 size;    /* allocated capacity of ranges */
 };
 
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 /* Child window structure. */
 struct window_pane {
 	u_int		 id;
@@ -1328,10 +1322,7 @@ struct window_pane {
 	struct grid_cell cached_active_gc;
 	struct colour_palette palette;
 	enum client_theme last_theme;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	struct style_line_entry border_status_line;
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	int		 pipe_fd;
 	pid_t		 pipe_pid;
@@ -2049,12 +2040,9 @@ struct client_window {
 };
 RB_HEAD(client_windows, client_window);
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 /* Maximum time to be pasting. */
 #define CLIENT_PASTE_TIME_LIMIT 5
 
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 /* Client connection. */
 typedef int (*prompt_input_cb)(struct client *, void *, const char *, int);
 typedef void (*prompt_free_cb)(void *);
@@ -2117,11 +2105,7 @@ struct client {
 	struct event		 repeat_timer;
 
 	struct event		 click_timer;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	int			 click_loc;
-=======
-	int			 click_where;
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	int			 click_wp;
 	u_int			 click_button;
 	struct mouse_event	 click_event;
@@ -2235,10 +2219,7 @@ struct client {
 #define PROMPT_ACCEPT 0x20
 #define PROMPT_QUOTENEXT 0x40
 #define PROMPT_BSPACE_EXIT 0x80
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 #define PROMPT_NOFREEZE 0x100
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	int			 prompt_flags;
 	enum prompt_type	 prompt_type;
 	int			 prompt_cursor;
@@ -2433,34 +2414,6 @@ enum sort_order {
 	SORT_END,
 };
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
-=======
-/* Paste buffer. */
-struct paste_buffer {
-	char		*data;
-	size_t		 size;
-
-	char		*name;
-	time_t		 created;
-	int		 automatic;
-	u_int		 order;
-
-	RB_ENTRY(paste_buffer) name_entry;
-	RB_ENTRY(paste_buffer) time_entry;
-};
-
-/* Sort orders. */
-enum sort_order {
-	SORT_ACTIVITY,
-	SORT_CREATION,
- 	SORT_INDEX,
-	SORT_NAME,
-	SORT_ORDER,
-	SORT_SIZE,
-	SORT_END,
-};
-
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 /* Sort criteria. */
 struct sort_criteria {
 	enum sort_order	 order;
@@ -2556,13 +2509,10 @@ struct window_pane	**sort_get_panes_window(struct window *, u_int *,
 struct winlink		**sort_get_winlinks(u_int *, struct sort_criteria *);
 struct winlink		**sort_get_winlinks_session(struct session *, u_int *,
 			      struct sort_criteria *);
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 struct key_binding	**sort_get_key_bindings(u_int *,
 			      struct sort_criteria *);
 struct key_binding	**sort_get_key_bindings_table(struct key_table *,
 			      u_int *, struct sort_criteria *);
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 /* format.c */
 #define FORMAT_STATUS 0x1
@@ -2782,10 +2732,7 @@ void	tty_repeat_requests(struct tty *, int);
 void	tty_stop_tty(struct tty *);
 void	tty_set_title(struct tty *, const char *);
 void	tty_set_path(struct tty *, const char *);
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 void	tty_set_progress_bar(struct tty *, struct progress_bar *);
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 void	tty_default_attributes(struct tty *, const struct grid_cell *,
 	    struct colour_palette *, u_int, struct hyperlinks *);
 void	tty_update_mode(struct tty *, int, struct screen *);
@@ -3483,11 +3430,7 @@ int	 screen_select_cell(struct screen *, struct grid_cell *,
 void	 screen_alternate_on(struct screen *, struct grid_cell *, int);
 void	 screen_alternate_off(struct screen *, struct grid_cell *, int);
 const char *screen_mode_to_string(int);
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 const char *screen_print(struct screen *, int);
-=======
-const char *screen_print(struct screen *);
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 /* window.c */
 extern struct windows windows;
@@ -3677,11 +3620,7 @@ int	 mode_tree_down(struct mode_tree_data *, int);
 struct mode_tree_data *mode_tree_start(struct window_pane *, struct args *,
 	     mode_tree_build_cb, mode_tree_draw_cb, mode_tree_search_cb,
 	     mode_tree_menu_cb, mode_tree_height_cb, mode_tree_key_cb,
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
              mode_tree_swap_cb, mode_tree_sort_cb, mode_tree_help_cb, void *,
-=======
-	     mode_tree_swap_cb, mode_tree_sort_cb, void *, 
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	     const struct menu_item *, struct screen **);
 void	 mode_tree_zoom(struct mode_tree_data *, struct args *);
 void	 mode_tree_build(struct mode_tree_data *);
@@ -3981,3 +3920,4 @@ void			 hyperlinks_reset(struct hyperlinks *);
 void			 hyperlinks_free(struct hyperlinks *);
 
 #endif /* TMUX_H */
+

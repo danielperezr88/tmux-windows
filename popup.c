@@ -110,7 +110,6 @@ static const struct menu_item popup_internal_menu_items[] = {
 };
 
 static void
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 popup_free(struct popup_data *pd)
 {
 	server_client_unref(pd->c);
@@ -132,8 +131,6 @@ popup_free(struct popup_data *pd)
 }
 
 static void
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 popup_reapply_styles(struct popup_data *pd)
 {
 	struct client		*c = pd->c;
@@ -373,27 +370,8 @@ popup_free_cb(struct client *c, void *data)
 			cmdq_get_client(item)->retval = pd->status;
 		cmdq_continue(item);
 	}
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 
 	popup_free(pd);
-=======
-	server_client_unref(pd->c);
-
-	if (pd->job != NULL)
-		job_free(pd->job);
-	input_free(pd->ictx);
-
-	free(pd->or[0].ranges);
-	free(pd->or[1].ranges);
-	free(pd->r.ranges);
-	screen_free(&pd->s);
-	colour_palette_free(&pd->palette);
-
-	free(pd->title);
-	free(pd->style);
-	free(pd->border_style);
-	free(pd);
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 }
 
 static void
@@ -886,7 +864,6 @@ popup_display(int flags, enum box_lines lines, struct cmdq_item *item, u_int px,
 	pd->psx = sx;
 	pd->psy = sy;
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (flags & POPUP_NOJOB)
 		pd->ictx = input_init(NULL, NULL, &pd->palette, NULL);
 	else {
@@ -900,12 +877,6 @@ popup_display(int flags, enum box_lines lines, struct cmdq_item *item, u_int px,
 		pd->ictx = input_init(NULL, job_get_event(pd->job),
 		    &pd->palette, c);
 	}
-=======
-	pd->job = job_run(shellcmd, argc, argv, env, s, cwd,
-	    popup_job_update_cb, popup_job_complete_cb, NULL, pd,
-	    JOB_NOWAIT|JOB_PTY|JOB_KEEPWRITE|JOB_DEFAULTSHELL, jx, jy);
-	pd->ictx = input_init(NULL, job_get_event(pd->job), &pd->palette, c);
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	server_client_set_overlay(c, 0, popup_check_cb, popup_mode_cb,
 	    popup_draw_cb, popup_key_cb, popup_free_cb, popup_resize_cb, pd);
@@ -1017,3 +988,4 @@ popup_editor(struct client *c, const char *buf, size_t len,
 	free(cmd);
 	return (0);
 }
+

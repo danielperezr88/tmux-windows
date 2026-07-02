@@ -1339,11 +1339,7 @@ tty_keys_clipboard(struct tty *tty, const char *buf, size_t len, size_t *size)
 {
 	struct client				*c = tty->client;
 	size_t					 end, terminator = 0, needed;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	char					*copy, *out, clip = 0;
-=======
-	char					*copy, *out;
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	int					 outlen;
 	struct input_request_clipboard_data	 cd;
 
@@ -1416,11 +1412,7 @@ tty_keys_clipboard(struct tty *tty, const char *buf, size_t len, size_t *size)
 	copy[end] = '\0';
 
 	/* Convert from base64. */
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	needed = ((end + 3) / 4) * 3;
-=======
-	needed = (end / 4) * 3;
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	if (needed == 0) {
 		free(copy);
 		return (0);
@@ -1437,10 +1429,7 @@ tty_keys_clipboard(struct tty *tty, const char *buf, size_t len, size_t *size)
 	/* Set reply if any. */
 	cd.buf = out;
 	cd.len = outlen;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	cd.clip = clip;
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	input_request_reply(c, INPUT_REQUEST_CLIPBOARD, &cd);
 
 	/* Create a buffer if requested. */
@@ -1837,3 +1826,4 @@ tty_keys_palette(struct tty *tty, const char *buf, size_t len, size_t *size)
 
 	return (0);
 }
+

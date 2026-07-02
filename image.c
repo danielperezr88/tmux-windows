@@ -137,12 +137,8 @@ image_store(struct screen *s, struct sixel_image *si)
 	image_fallback(&im->fallback, im->sx, im->sy);
 
 	image_log(im, __func__, NULL);
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	im->list = &s->images;
 	TAILQ_INSERT_TAIL(im->list, im, entry);
-=======
-	TAILQ_INSERT_TAIL(&s->images, im, entry);
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	TAILQ_INSERT_TAIL(&all_images, im, all_entry);
 	if (++all_images_count == MAX_IMAGE_COUNT)
@@ -226,3 +222,4 @@ image_scroll_up(struct screen *s, u_int lines)
 	}
 	return (redraw);
 }
+

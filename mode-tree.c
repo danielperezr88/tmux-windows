@@ -58,10 +58,7 @@ struct mode_tree_data {
 	mode_tree_key_cb	  keycb;
 	mode_tree_swap_cb	  swapcb;
 	mode_tree_sort_cb	  sortcb;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	mode_tree_help_cb	  helpcb;
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	struct mode_tree_list	  children;
 	struct mode_tree_list	  saved;
@@ -494,14 +491,9 @@ mode_tree_start(struct window_pane *wp, struct args *args,
     mode_tree_build_cb buildcb, mode_tree_draw_cb drawcb,
     mode_tree_search_cb searchcb, mode_tree_menu_cb menucb,
     mode_tree_height_cb heightcb, mode_tree_key_cb keycb,
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
     mode_tree_swap_cb swapcb, mode_tree_sort_cb sortcb,
     mode_tree_help_cb helpcb, void *modedata, const struct menu_item *menu,
     struct screen **s)
-=======
-    mode_tree_swap_cb swapcb, mode_tree_sort_cb sortcb, void *modedata,
-    const struct menu_item *menu, struct screen **s)
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 {
 	struct mode_tree_data	*mtd;
 
@@ -535,10 +527,7 @@ mode_tree_start(struct window_pane *wp, struct args *args,
 	mtd->keycb = keycb;
 	mtd->swapcb = swapcb;
 	mtd->sortcb = sortcb;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	mtd->helpcb = helpcb;
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	TAILQ_INIT(&mtd->children);
 
@@ -1500,3 +1489,4 @@ mode_tree_run_command(struct client *c, struct cmd_find_state *fs,
 	}
 	free(command);
 }
+

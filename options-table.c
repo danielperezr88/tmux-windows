@@ -417,17 +417,10 @@ const struct options_table_entry options_table[] = {
 	  .choices = options_table_get_clipboard_list,
 	  .default_num = 1,
 	  .text = "When an application requests the clipboard, whether to "
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 		  "ignore the request ('off'); respond with the newest buffer "
 		  "('buffer'); request the clipboard from the most recently "
 		  "used terminal ('request'); or to request the clipboard, "
 		  "create a buffer, and send it to the application ('both')."
-=======
-	          "ignore the request ('off'); respond with the newest buffer "
-	          "('buffer'); request the clipboard from the most recently "
-	          "used terminal ('request'); or to request the clipboard, "
-	          "create a buffer, and send it to the application ('both')."
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	},
 
 	{ .name = "history-file",
@@ -1718,3 +1711,4 @@ const struct options_table_entry options_table[] = {
 
 	{ .name = NULL }
 };
+

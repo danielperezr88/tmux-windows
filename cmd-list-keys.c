@@ -110,31 +110,8 @@ cmd_list_keys_get_root_and_prefix(u_int *n, struct sort_criteria *sort_crit)
 			lsz = len + 100;
 			l = xreallocarray(l, lsz, sizeof *l);
 		}
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 		memcpy(l + offset, lt, ltsz * sizeof *l);
 		offset += ltsz;
-=======
-		found = 1;
-		key = key_string_lookup_key(bd->key, 0);
-
-		if (bd->note == NULL || *bd->note == '\0')
-			note = cmd_list_print(bd->cmdlist,
-			    CMD_LIST_PRINT_ESCAPED|CMD_LIST_PRINT_NO_GROUPS);
-		else
-			note = xstrdup(bd->note);
-		tmp = utf8_padcstr(key, keywidth + 1);
-		if (args_has(args, '1') && tc != NULL) {
-			status_message_set(tc, -1, 1, 0, 0, "%s%s%s", prefix,
-			    tmp, note);
-		} else
-			cmdq_print(item, "%s%s%s", prefix, tmp, note);
-		free(tmp);
-		free(note);
-
-		if (args_has(args, '1'))
-			break;
-		bd = key_bindings_next(table, bd);
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	}
 
 	*n = len;
@@ -218,147 +195,11 @@ cmd_list_keys_exec(struct cmd *self, struct cmdq_item *item)
 	}
 	sort_crit.reversed = args_has(args, 'r');
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if ((tablename = args_get(args, 'T')) != NULL) {
 		table = key_bindings_get_table(tablename, 0);
 		if (table == NULL) {
 			cmdq_error(item, "table %s doesn't exist", tablename);
 			return (CMD_RETURN_ERROR);
-=======
-	if (args_has(args, 'N')) {
-		if (tablename == NULL) {
-			start = cmd_list_keys_get_prefix(args, &prefix);
-			keywidth = cmd_list_keys_get_width("root", only);
-			if (prefix != KEYC_NONE) {
-				width = cmd_list_keys_get_width("prefix", only);
-				if (width == 0)
-					prefix = KEYC_NONE;
-				else if (width > keywidth)
-					keywidth = width;
-			}
-			empty = utf8_padcstr("", utf8_cstrwidth(start));
-
-			found = cmd_list_keys_print_notes(item, args, "root",
-			    keywidth, only, empty);
-			if (prefix != KEYC_NONE) {
-				if (cmd_list_keys_print_notes(item, args,
-				    "prefix", keywidth, only, start))
-					found = 1;
-			}
-			free(empty);
-		} else {
-			if (args_has(args, 'P'))
-				start = xstrdup(args_get(args, 'P'));
-			else
-				start = xstrdup("");
-			keywidth = cmd_list_keys_get_width(tablename, only);
-			found = cmd_list_keys_print_notes(item, args, tablename,
-			    keywidth, only, start);
-
-		}
-		free(start);
-		goto out;
-	}
-
-	repeat = 0;
-	tablewidth = keywidth = 0;
-	table = key_bindings_first_table();
-	while (table != NULL) {
-		if (tablename != NULL && strcmp(table->name, tablename) != 0) {
-			table = key_bindings_next_table(table);
-			continue;
-		}
-		bd = key_bindings_first(table);
-		while (bd != NULL) {
-			if (only != KEYC_UNKNOWN && bd->key != only) {
-				bd = key_bindings_next(table, bd);
-				continue;
-			}
-			key = args_escape(key_string_lookup_key(bd->key, 0));
-
-			if (bd->flags & KEY_BINDING_REPEAT)
-				repeat = 1;
-
-			width = utf8_cstrwidth(table->name);
-			if (width > tablewidth)
-				tablewidth = width;
-			width = utf8_cstrwidth(key);
-			if (width > keywidth)
-				keywidth = width;
-
-			free(key);
-			bd = key_bindings_next(table, bd);
-		}
-		table = key_bindings_next_table(table);
-	}
-
-	tmpsize = 256;
-	tmp = xmalloc(tmpsize);
-
-	table = key_bindings_first_table();
-	while (table != NULL) {
-		if (tablename != NULL && strcmp(table->name, tablename) != 0) {
-			table = key_bindings_next_table(table);
-			continue;
-		}
-		bd = key_bindings_first(table);
-		while (bd != NULL) {
-			if (only != KEYC_UNKNOWN && bd->key != only) {
-				bd = key_bindings_next(table, bd);
-				continue;
-			}
-			found = 1;
-			key = args_escape(key_string_lookup_key(bd->key, 0));
-
-			if (!repeat)
-				r = "";
-			else if (bd->flags & KEY_BINDING_REPEAT)
-				r = "-r ";
-			else
-				r = "   ";
-			tmpused = xsnprintf(tmp, tmpsize, "%s-T ", r);
-
-			cp = utf8_padcstr(table->name, tablewidth);
-			cplen = strlen(cp) + 1;
-			while (tmpused + cplen + 1 >= tmpsize) {
-				tmpsize *= 2;
-				tmp = xrealloc(tmp, tmpsize);
-			}
-			strlcat(tmp, cp, tmpsize);
-			tmpused = strlcat(tmp, " ", tmpsize);
-			free(cp);
-
-			cp = utf8_padcstr(key, keywidth);
-			cplen = strlen(cp) + 1;
-			while (tmpused + cplen + 1 >= tmpsize) {
-				tmpsize *= 2;
-				tmp = xrealloc(tmp, tmpsize);
-			}
-			strlcat(tmp, cp, tmpsize);
-			tmpused = strlcat(tmp, " ", tmpsize);
-			free(cp);
-
-			cp = cmd_list_print(bd->cmdlist,
-			    CMD_LIST_PRINT_ESCAPED|CMD_LIST_PRINT_NO_GROUPS);
-			cplen = strlen(cp);
-			while (tmpused + cplen + 1 >= tmpsize) {
-				tmpsize *= 2;
-				tmp = xrealloc(tmp, tmpsize);
-			}
-			strlcat(tmp, cp, tmpsize);
-			free(cp);
-
-			if (args_has(args, '1') && tc != NULL) {
-				status_message_set(tc, -1, 1, 0, 0,
-				    "bind-key %s", tmp);
-			} else
-				cmdq_print(item, "bind-key %s", tmp);
-			free(key);
-
-			if (args_has(args, '1'))
-				break;
-			bd = key_bindings_next(table, bd);
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		}
 	}
 
@@ -410,3 +251,4 @@ cmd_list_keys_exec(struct cmd *self, struct cmdq_item *item)
 
 	return (CMD_RETURN_NORMAL);
 }
+

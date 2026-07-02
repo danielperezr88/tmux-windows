@@ -178,14 +178,10 @@ parse_window_name(const char *in)
 #else
 	if (*name == '/')
 		name = basename(name);
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	name = clean_name(name, 0);
-=======
-#endif
-	name = xstrdup(name);
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	free(copy);
 	if (name == NULL)
 		return (xstrdup(""));
 	return (name);
 }
+

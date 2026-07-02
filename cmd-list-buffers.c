@@ -60,13 +60,10 @@ cmd_list_buffers_exec(struct cmd *self, struct cmdq_item *item)
 	filter = args_get(args, 'f');
 
 	sort_crit.order = sort_order_from_string(args_get(args, 'O'));
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (sort_crit.order == SORT_END && args_has(args, 'O')) {
 		cmdq_error(item, "invalid sort order");
 		return (CMD_RETURN_ERROR);
 	}
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	sort_crit.reversed = args_has(args, 'r');
 
 	l = sort_get_buffers(&n, &sort_crit);
@@ -91,3 +88,4 @@ cmd_list_buffers_exec(struct cmd *self, struct cmdq_item *item)
 
 	return (CMD_RETURN_NORMAL);
 }
+

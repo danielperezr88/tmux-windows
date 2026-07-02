@@ -4705,7 +4705,6 @@ format_window_name(struct format_expand_state *es, const char *fmt)
 	return (xstrdup("0"));
 }
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 /* Add neighbor window variables to the format tree. */
 static void
 format_add_window_neighbor(struct format_tree *nft, struct winlink *wl,
@@ -4737,8 +4736,6 @@ format_add_window_neighbor(struct format_tree *nft, struct winlink *wl,
 	}
 }
 
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 /* Loop over windows. */
 static char *
 format_loop_windows(struct format_expand_state *es, const char *fmt)
@@ -6128,3 +6125,4 @@ format_grid_hyperlink(struct grid *gd, u_int x, u_int y, struct screen* s)
 		return (NULL);
 	return (xstrdup(uri));
 }
+

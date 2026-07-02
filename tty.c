@@ -1230,12 +1230,9 @@ tty_clear_line(struct tty *tty, const struct grid_cell *defaults, u_int py,
     u_int px, u_int nx, u_int bg)
 {
 	struct client		*c = tty->client;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	struct visible_ranges	*r;
 	struct visible_range	*rr;
 	u_int			 i;
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	log_debug("%s: %s, %u at %u,%u", __func__, c->name, nx, px, py);
 
@@ -1271,7 +1268,6 @@ tty_clear_line(struct tty *tty, const struct grid_cell *defaults, u_int py,
 	 * Couldn't use an escape sequence, use spaces. Clear only the visible
 	 * bit if there is an overlay.
 	 */
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	r = tty_check_overlay_range(tty, px, py, nx);
 	for (i = 0; i < r->used; i++) {
 		rr = &r->ranges[i];
@@ -1280,10 +1276,6 @@ tty_clear_line(struct tty *tty, const struct grid_cell *defaults, u_int py,
 			tty_repeat_space(tty, rr->nx);
 		}
 	}
-=======
-	tty_cursor(tty, px, py);
-	tty_repeat_space(tty, nx);
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 }
 
 /* Clear a line, adjusting to visible part of pane. */
@@ -1493,7 +1485,6 @@ tty_draw_pane(struct tty *tty, const struct tty_ctx *ctx, u_int py)
 	}
 }
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 void
 tty_cmd_redrawline(struct tty *tty, const struct tty_ctx *ctx)
 {
@@ -1516,8 +1507,6 @@ tty_cmd_redrawline(struct tty *tty, const struct tty_ctx *ctx)
 }
 
 /* Check if character needs to be mapped for codeset. */
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 const struct grid_cell *
 tty_check_codeset(struct tty *tty, const struct grid_cell *gc)
 {
@@ -2118,20 +2107,9 @@ tty_cmd_cell(struct tty *tty, const struct tty_ctx *ctx)
 	if (!tty_is_visible(tty, ctx, ctx->ocx, ctx->ocy, 1, 1))
 		return;
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (gcp->data.width == 1 && !tty_check_overlay(tty, px, py))
 		return;
 	if (gcp->data.width > 1) { /* could be partially obscured */
-=======
-	if (ctx->num == 2) {
-		tty_draw_line(tty, s, 0, s->cy, screen_size_x(s),
-		    ctx->xoff - ctx->wox, py, &ctx->defaults, ctx->palette);
-		return;
-	}
-
-	/* Handle partially obstructed wide characters. */
-	if (gcp->data.width > 1) {
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		r = tty_check_overlay_range(tty, px, py, gcp->data.width);
 		for (i = 0; i < r->used; i++)
 			vis += r->ranges[i].nx;
@@ -2163,11 +2141,7 @@ void
 tty_cmd_cells(struct tty *tty, const struct tty_ctx *ctx)
 {
 	struct visible_ranges	*r;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	struct visible_range	*ri;
-=======
-	struct visible_range	*rr;
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	u_int			 i, px, py, cx;
 	const char		*cp = ctx->data.data;
 	size_t			 n = ctx->data.size;
@@ -2200,7 +2174,6 @@ tty_cmd_cells(struct tty *tty, const struct tty_ctx *ctx)
 	px = ctx->xoff + ctx->ocx - ctx->wox;
 	py = ctx->yoff + ctx->ocy - ctx->woy;
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	r = tty_check_overlay_range(tty, px, py, n);
 	for (i = 0; i < r->used; i++) {
 		ri = &r->ranges[i];
@@ -2208,15 +2181,6 @@ tty_cmd_cells(struct tty *tty, const struct tty_ctx *ctx)
 			cx = ri->px - ctx->xoff + ctx->wox;
 			tty_cursor_pane_unless_wrap(tty, ctx, cx, ctx->ocy);
 			tty_putn(tty, cp + ri->px - px, ri->nx, ri->nx);
-=======
-	r = tty_check_overlay_range(tty, px, py, ctx->num);
-	for (i = 0; i < r->used; i++) {
-		rr = &r->ranges[i];
-		if (rr->nx != 0) {
-			cx = rr->px - ctx->xoff + ctx->wox;
-			tty_cursor_pane_unless_wrap(tty, ctx, cx, ctx->ocy);
-			tty_putn(tty, cp + rr->px - px, rr->nx, rr->nx);
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		}
 	}
 }
@@ -3168,7 +3132,6 @@ tty_style_changed(struct window_pane *wp)
 }
 
 void
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 tty_default_colours(struct grid_cell *gc, struct window_pane *wp)
 {
 	if (wp->flags & PANE_STYLECHANGED)
@@ -3186,8 +3149,6 @@ tty_default_colours(struct grid_cell *gc, struct window_pane *wp)
 }
 
 void
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 tty_default_attributes(struct tty *tty, const struct grid_cell *defaults,
     struct colour_palette *palette, u_int bg, struct hyperlinks *hl)
 {
@@ -3216,7 +3177,6 @@ tty_clipboard_query(struct tty *tty)
 		tty->flags |= TTY_OSC52QUERY;
 		evtimer_add(&tty->clipboard_timer, &tv);
 	}
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 }
 
 void
@@ -3224,6 +3184,5 @@ tty_set_progress_bar(struct tty *tty, struct progress_bar *pb)
 {
 	if (tty_term_has(tty->term, TTYC_SPB))
 		tty_putcode_ii(tty, TTYC_SPB, pb->state, pb->progress);
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 }
+

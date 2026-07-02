@@ -823,7 +823,6 @@ screen_mode_to_string(int mode)
 		strlcat(tmp, "KEYS_EXTENDED_2,", sizeof tmp);
 	if (mode & MODE_THEME_UPDATES)
 		strlcat(tmp, "THEME_UPDATES,", sizeof tmp);
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (mode & MODE_SYNC)
 		strlcat(tmp, "SYNC,", sizeof tmp);
 	if (*tmp != '\0')
@@ -834,14 +833,6 @@ screen_mode_to_string(int mode)
 /* Convert screen to a string. */
 const char *
 screen_print(struct screen *s, int line)
-=======
-	tmp[strlen(tmp) - 1] = '\0';
-	return (tmp);
-}
-
-const char *
-screen_print(struct screen *s)
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 {
 	static char		*buf;
 	static size_t		 len = 16384;
@@ -857,11 +848,8 @@ screen_print(struct screen *s)
 		buf = xmalloc(len);
 
 	for (y = 0; y < screen_hsize(s) + s->grid->sy; y++) {
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 		if (line >= 0 && y != (u_int)line)
 			continue;
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		n = snprintf(buf + last, len - last, "%.4d \"", y);
 		if (n <= 0 || (u_int)n >= len - last)
 			goto out;
@@ -915,3 +903,4 @@ out:
 	buf[last] = '\0';
 	return (buf);
 }
+

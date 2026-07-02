@@ -470,13 +470,10 @@ key_bindings_init(void)
 		/* Mouse button 1 down on status line. */
 		"bind -n MouseDown1Status { switch-client -t= }",
 		"bind -n C-MouseDown1Status { swap-window -t@ }",
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 
 		/* Mouse button 1 down on default pane-border-format */
 		"bind -n MouseDown1Control9 { display-menu -t= -xM -yM -O -T 'Kill pane #{pane_index}?' 'Yes' 'y' { kill-pane -t= } 'No' 'n' {}}",
 		"bind -n MouseDown1Control8 { resize-pane -Z }",
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 		/* Mouse wheel down on status line. */
 		"bind -n WheelDownStatus { next-window }",
@@ -730,3 +727,4 @@ key_bindings_has_repeat(struct key_binding **l, u_int n)
 	}
 	return (0);
 }
+

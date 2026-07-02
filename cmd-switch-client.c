@@ -63,10 +63,7 @@ cmd_switch_client_exec(struct cmd *self, struct cmdq_item *item)
 	const char		*tablename;
 	struct key_table	*table;
 	struct sort_criteria	 sort_crit;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	uid_t			 uid;
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	if (tflag != NULL &&
 	    (tflag[strcspn(tflag, ":.%")] != '\0' || strcmp(tflag, "=") == 0)) {
@@ -110,13 +107,10 @@ cmd_switch_client_exec(struct cmd *self, struct cmdq_item *item)
 	}
 
 	sort_crit.order = sort_order_from_string(args_get(args, 'O'));
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (sort_crit.order == SORT_END && args_has(args, 'O')) {
 		cmdq_error(item, "invalid sort order");
 		return (CMD_RETURN_ERROR);
 	}
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	sort_crit.reversed = args_has(args, 'r');
 
 	if (args_has(args, 'n')) {
@@ -167,3 +161,4 @@ cmd_switch_client_exec(struct cmd *self, struct cmdq_item *item)
 
 	return (CMD_RETURN_NORMAL);
 }
+

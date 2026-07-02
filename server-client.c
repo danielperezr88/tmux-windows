@@ -842,22 +842,14 @@ server_client_check_mouse(struct client *c, struct key_event *event)
 		if (c->flags & CLIENT_DOUBLECLICK) {
 			evtimer_del(&c->click_timer);
 			c->flags &= ~CLIENT_DOUBLECLICK;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 			type = KEYC_TYPE_SECONDCLICK;
-=======
-			type = SECOND;
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 			x = m->x, y = m->y, b = m->b;
 			log_debug("second-click at %u,%u", x, y);
 			c->flags |= CLIENT_TRIPLECLICK;
 		} else if (c->flags & CLIENT_TRIPLECLICK) {
 			evtimer_del(&c->click_timer);
 			c->flags &= ~CLIENT_TRIPLECLICK;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 			type = KEYC_TYPE_TRIPLECLICK;
-=======
-			type = TRIPLE;
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 			x = m->x, y = m->y, b = m->b;
 			log_debug("triple-click at %u,%u", x, y);
 			goto have_event;
@@ -1007,7 +999,6 @@ have_event:
 	}
 
 	/* Reset click type or add a click timer if needed. */
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (type == KEYC_TYPE_MOUSEDOWN ||
 	    type == KEYC_TYPE_SECONDCLICK ||
 	    type == KEYC_TYPE_TRIPLECLICK) {
@@ -1016,32 +1007,15 @@ have_event:
 		    loc != (enum key_code_mouse_location)c->click_loc ||
 		    m->wp != c->click_wp)) {
 			type = KEYC_TYPE_MOUSEDOWN;
-=======
-	if (type == DOWN ||
-	    type == SECOND ||
-	    type == TRIPLE) {
-		if (type != DOWN &&
-		    (m->b != c->click_button ||
-		    where != (enum mouse_where)c->click_where ||
-		    m->wp != c->click_wp)) {
-			type = DOWN;
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 			log_debug("click sequence reset at %u,%u", x, y);
 			c->flags &= ~CLIENT_TRIPLECLICK;
 			c->flags |= CLIENT_DOUBLECLICK;
 		}
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 		if (type != KEYC_TYPE_TRIPLECLICK && KEYC_CLICK_TIMEOUT != 0) {
 			memcpy(&c->click_event, m, sizeof c->click_event);
 			c->click_button = m->b;
 			c->click_loc = loc;
-=======
-		if (type != TRIPLE && KEYC_CLICK_TIMEOUT != 0) {
-			memcpy(&c->click_event, m, sizeof c->click_event);
-			c->click_button = m->b;
-			c->click_where = where;
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 			c->click_wp = m->wp;
 
 			log_debug("click timer started");
@@ -1052,11 +1026,8 @@ have_event:
 		}
 	}
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	key = KEYC_UNKNOWN;
 
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	/* Stop dragging if needed. */
 	if (type != KEYC_TYPE_MOUSEDRAG &&
 	    type != KEYC_TYPE_WHEELUP &&
@@ -1082,7 +1053,6 @@ have_event:
 	}
 
 	/* Convert to a key binding. */
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (type == KEYC_TYPE_MOUSEMOVE && loc == KEYC_MOUSE_LOCATION_PANE) {
 		key = KEYC_MOUSEMOVE_PANE;
 		if (wp != NULL &&
@@ -1095,35 +1065,6 @@ have_event:
 		}
 	}
 	if (type == KEYC_TYPE_MOUSEDRAG) {
-=======
-	key = KEYC_UNKNOWN;
-	switch (type) {
-	case NOTYPE:
-		break;
-	case MOVE:
-		if (where == PANE) {
-			key = KEYC_MOUSEMOVE_PANE;
-			if (wp != NULL &&
-			    wp != w->active &&
-			    options_get_number(s->options, "focus-follows-mouse")) {
-				window_set_active_pane(w, wp, 1);
-				server_redraw_window_borders(w);
-				server_status_window(w);
-			}
-		}
-		if (where == STATUS)
-			key = KEYC_MOUSEMOVE_STATUS;
-		if (where == STATUS_LEFT)
-			key = KEYC_MOUSEMOVE_STATUS_LEFT;
-		if (where == STATUS_RIGHT)
-			key = KEYC_MOUSEMOVE_STATUS_RIGHT;
-		if (where == STATUS_DEFAULT)
-			key = KEYC_MOUSEMOVE_STATUS_DEFAULT;
-		if (where == BORDER)
-			key = KEYC_MOUSEMOVE_BORDER;
-		break;
-	case DRAG:
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		if (c->tty.mouse_drag_update != NULL)
 			key = KEYC_DRAGGING;
 
@@ -3107,3 +3048,4 @@ server_client_report_theme(struct client *c, enum client_theme theme)
 	 */
 	tty_repeat_requests(&c->tty, 1);
 }
+

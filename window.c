@@ -383,23 +383,10 @@ window_pane_destroy_ready(struct window_pane *wp)
 {
 	int	n;
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (wp->pipe_fd != -1 && EVBUFFER_LENGTH(wp->pipe_event->output) != 0)
 		return (0);
 	if (ioctl(wp->fd, FIONREAD, &n) != -1 && n > 0)
 		return (0);
-=======
-	if (wp->pipe_fd != -1) {
-		if (EVBUFFER_LENGTH(wp->pipe_event->output) != 0)
-			return (0);
-#ifdef _WIN32
-		/* On Windows, skip FIONREAD ioctl (not applicable to sockets here). */
-#else
-		if (ioctl(wp->fd, FIONREAD, &n) != -1 && n > 0)
-			return (0);
-#endif
-	}
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 
 	if (~wp->flags & PANE_EXITED)
 		return (0);
@@ -1954,11 +1941,8 @@ window_pane_mode(struct window_pane *wp)
 int
 window_pane_show_scrollbar(struct window_pane *wp)
 {
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	struct window	*w = wp->window;
 
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	if (SCREEN_IS_ALTERNATE(&wp->base))
 		return (0);
 	if (w->sb == PANE_SCROLLBARS_ALWAYS ||
@@ -2140,7 +2124,6 @@ window_pane_send_theme_update(struct window_pane *wp)
 		log_debug("%s: %%%u unknown theme", __func__, wp->id);
 		break;
 	}
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 }
 
 struct style_range *
@@ -2181,6 +2164,5 @@ window_pane_is_floating(struct window_pane *wp)
 	if (lc == NULL || (lc->flags & LAYOUT_CELL_FLOATING) == 0)
 		return (0);
 	return (1);
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 }
+

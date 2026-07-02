@@ -430,71 +430,7 @@ spawn_pane(struct spawn_context *sc, char **cause)
 		goto complete;
 	}
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	/* Store current working directory and change to new one. */
-=======
-#ifdef _WIN32
-	{
-		/*
-		 * Windows: use ConPTY + CreateProcess instead of fdforkpty.
-		 * Build command line, create pseudo console, launch process.
-		 */
-		struct win32_pty	*pty;
-		char			*cmdline, *envblock;
-		const char		*shell = new_wp->shell;
-
-		if (new_wp->argc == 1) {
-			xasprintf(&cmdline, "\"%s\" /c %s", shell,
-			    new_wp->argv[0]);
-		} else if (new_wp->argc > 1) {
-			int i;
-			size_t total = 0;
-			for (i = 0; i < new_wp->argc; i++)
-				total += strlen(new_wp->argv[i]) + 1;
-			cmdline = xmalloc(total + 1);
-			*cmdline = '\0';
-			for (i = 0; i < new_wp->argc; i++) {
-				if (i > 0)
-					strlcat(cmdline, " ", total + 1);
-				strlcat(cmdline, new_wp->argv[i], total + 1);
-			}
-		} else {
-			/* Login shell. */
-			xasprintf(&cmdline, "\"%s\"", shell);
-		}
-
-		envblock = environ_to_win32_block(child);
-		pty = win32_pty_spawn(cmdline,
-		    new_wp->cwd ? new_wp->cwd : ".",
-		    envblock,
-		    (int)ws.ws_col, (int)ws.ws_row,
-		    &new_wp->pid);
-		free(envblock);
-		free(cmdline);
-
-		if (pty == NULL) {
-			xasprintf(cause, "spawn failed");
-			new_wp->fd = -1;
-			if (~sc->flags & SPAWN_RESPAWN) {
-				server_client_remove_pane(new_wp);
-				layout_close_pane(new_wp);
-				window_remove_pane(w, new_wp);
-			}
-			environ_free(child);
-			return (NULL);
-		}
-
-		new_wp->fd = win32_pty_get_fd(pty);
-		new_wp->win32_pty = pty;
-		strlcpy(new_wp->tty, "conpty", sizeof new_wp->tty);
-
-		/* Watch for child exit. */
-		win32_process_watch(win32_pty_get_process(pty), new_wp->pid);
-		goto complete;
-	}
-#else
-    /* Store current working directory and change to new one. */
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	if (getcwd(path, sizeof path) != NULL) {
 		if (chdir(new_wp->cwd) == 0)
 			actual_cwd = new_wp->cwd;
@@ -520,10 +456,6 @@ spawn_pane(struct spawn_context *sc, char **cause)
 	}
 #endif
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
-=======
-#ifndef _WIN32
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	/*
 	 * In the parent process, everything is done now. Change the working
 	 * directory back.
@@ -643,3 +575,4 @@ complete:
 		notify_window("window-layout-changed", w);
 	return (new_wp);
 }
+

@@ -1016,17 +1016,10 @@ control_check_subs_all_windows_one(struct client *c, struct control_sub *csub,
 	struct control_sub_window	*csw, find;
 
 	value = format_expand(ft, csub->format);
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 
 	find.window = w->id;
 	find.idx = wl->idx;
 
-=======
-
-	find.window = w->id;
-	find.idx = wl->idx;
-
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	csw = RB_FIND(control_sub_windows, &csub->windows, &find);
 	if (csw == NULL) {
 		csw = xcalloc(1, sizeof *csw);
@@ -1064,18 +1057,14 @@ control_check_subs_timer(__unused int fd, __unused short events, void *data)
 	log_debug("%s: timer fired", __func__);
 	evtimer_add(&cs->subs_timer, &tv);
 
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 	if (s == NULL)
 		return;
 
-=======
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 	/* Find which subscription types are present. */
 	RB_FOREACH(csub, control_subs, &cs->subs) {
 		switch (csub->type) {
 		case CONTROL_SUB_SESSION:
 			have_session = 1;
-<<<<<<< C:\Users\danie\AppData\Local\Temp\w32m\cur.tmp
 			break;
 		case CONTROL_SUB_ALL_PANES:
 			have_all_panes = 1;
@@ -1085,17 +1074,6 @@ control_check_subs_timer(__unused int fd, __unused short events, void *data)
 			break;
 		default:
 			break;
-=======
-			break;
-		case CONTROL_SUB_ALL_PANES:
-			have_all_panes = 1;
-			break;
-		case CONTROL_SUB_ALL_WINDOWS:
-			have_all_windows = 1;
-			break;
-		default:
-			break;
->>>>>>> C:\Users\danie\AppData\Local\Temp\w32m\master.tmp
 		}
 	}
 
@@ -1200,3 +1178,4 @@ control_remove_sub(struct client *c, const char *name)
 	if (RB_EMPTY(&cs->subs))
 		evtimer_del(&cs->subs_timer);
 }
+
