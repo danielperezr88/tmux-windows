@@ -67,6 +67,10 @@ struct job {
 	job_free_cb		 freecb;
 	void			*data;
 
+#ifdef _WIN32
+	void			*win32_pty;	/* ConPTY handle for cleanup */
+#endif
+
 	LIST_ENTRY(job)		 entry;
 };
 
@@ -178,9 +182,10 @@ job_run(const char *cmd, int argc, char **argv, struct environ *e,
 	job->freecb = freecb;
 	job->data = data;
 
-	if (flags & JOB_PTY)
+	if (flags & JOB_PTY) {
 		job->fd = win32_pty_get_fd(pty);
-	else {
+		job->win32_pty = pty;
+	} else {
 		close(out[1]);
 		job->fd = out[0];
 	}
@@ -355,6 +360,10 @@ job_free(struct job *job)
 		kill(job->pid, SIGTERM);
 	if (job->event != NULL)
 		bufferevent_free(job->event);
+#ifdef _WIN32
+	if (job->win32_pty != NULL)
+		win32_pty_close((struct win32_pty *)job->win32_pty);
+#endif
 	if (job->fd != -1)
 		close(job->fd);
 
