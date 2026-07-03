@@ -140,6 +140,7 @@ job_run(const char *cmd, int argc, char **argv, struct environ *e,
 		free(cmdline);
 		if (pty == NULL)
 			goto fail;
+		win32_process_watch(win32_pty_get_process(pty), pid);
 	} else {
 		if (socketpair(AF_UNIX, SOCK_STREAM, PF_UNSPEC, out) != 0)
 			goto fail;
