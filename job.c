@@ -381,8 +381,11 @@ job_free(struct job *job)
 	if (job->event != NULL)
 		bufferevent_free(job->event);
 #ifdef _WIN32
-	if (job->win32_pty != NULL)
+	if (job->win32_pty != NULL) {
 		win32_pty_close((struct win32_pty *)job->win32_pty);
+		job->win32_pty = NULL;
+		job->fd = -1; /* already closed by win32_pty_close */
+	}
 #endif
 	if (job->fd != -1)
 		close(job->fd);
