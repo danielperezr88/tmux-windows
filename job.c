@@ -176,6 +176,16 @@ job_run(const char *cmd, int argc, char **argv, struct environ *e,
 
 	LIST_INSERT_HEAD(&all_jobs, job, entry);
 
+	{
+		FILE *diag = fopen("C:\\temp\\tmux-exit.log", "a");
+		if (diag) {
+			fprintf(diag, "JOB_REGISTERED: pid=%d cmd='%s'\n",
+			    (int)pid, job->cmd ? job->cmd : "(null)");
+			fflush(diag);
+			fclose(diag);
+		}
+	}
+
 #ifdef _WIN32
 	/*
 	 * Register process watch AFTER job is in list to avoid race
@@ -468,8 +478,27 @@ job_check_died(pid_t pid, int status)
 		if (pid == job->pid)
 			break;
 	}
-	if (job == NULL)
+	if (job == NULL) {
+		{
+			FILE *diag = fopen("C:\\temp\\tmux-exit.log", "a");
+			if (diag) {
+				fprintf(diag, "JOB_CHECK_DIED: pid=%d NOT FOUND\n",
+				    (int)pid);
+				fflush(diag);
+				fclose(diag);
+			}
+		}
 		return;
+	}
+	{
+		FILE *diag = fopen("C:\\temp\\tmux-exit.log", "a");
+		if (diag) {
+			fprintf(diag, "JOB_CHECK_DIED: pid=%d state=%d cmd='%s'\n",
+			    (int)pid, job->state, job->cmd ? job->cmd : "(null)");
+			fflush(diag);
+			fclose(diag);
+		}
+	}
 	if (WIFSTOPPED(status)) {
 		if (WSTOPSIG(status) == SIGTTIN || WSTOPSIG(status) == SIGTTOU)
 			return;
@@ -479,6 +508,18 @@ job_check_died(pid_t pid, int status)
 	log_debug("job died %p: %s, pid %ld", job, job->cmd, (long) job->pid);
 
 	job->status = status;
+
+#ifdef _WIN32
+	/*
+	 * Wake up the PTY bridge thread — after the child exits, ReadFile
+	 * on the ConPTY pipe blocks indefinitely until ClosePseudoConsole
+	 * is called. win32_pty_signal_close sets closing=1 which breaks the
+	 * bridge thread so it closes the socket, fires the bufferevent
+	 * error callback, which calls completecb then job_free.
+	 */
+	if (job->win32_pty != NULL)
+		win32_pty_signal_close((struct win32_pty *)job->win32_pty);
+#endif
 
 	if (job->state == JOB_CLOSED) {
 		if (job->completecb != NULL)
