@@ -76,10 +76,10 @@ getshell(void)
 #ifdef _WIN32
 	const char	*shell;
 
-	shell = getenv("SHELL");
+	shell = getenv("COMSPEC");
 	if (shell != NULL && *shell != '\0')
 		return (shell);
-	shell = getenv("COMSPEC");
+	shell = getenv("SHELL");
 	if (shell != NULL && *shell != '\0')
 		return (shell);
 	return (_PATH_BSHELL);
