@@ -7,6 +7,12 @@
 #ifndef WIN32_PLATFORM_H
 #define WIN32_PLATFORM_H
 
+/*
+ * Debug options — uncomment to enable.
+ * TMUX_DEBUG_EXIT: log process exit/watcher/signal chain to C:\temp\tmux-exit.log
+ */
+/* #define TMUX_DEBUG_EXIT */
+
 /* Must be defined before including windows.h for newer APIs. */
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0A00 /* Windows 10 */

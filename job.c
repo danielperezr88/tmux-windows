@@ -176,6 +176,7 @@ job_run(const char *cmd, int argc, char **argv, struct environ *e,
 
 	LIST_INSERT_HEAD(&all_jobs, job, entry);
 
+#ifdef TMUX_DEBUG_EXIT
 	{
 		FILE *diag = fopen("C:\\temp\\tmux-exit.log", "a");
 		if (diag) {
@@ -185,6 +186,7 @@ job_run(const char *cmd, int argc, char **argv, struct environ *e,
 			fclose(diag);
 		}
 	}
+#endif
 
 #ifdef _WIN32
 	/*
@@ -484,6 +486,7 @@ job_check_died(pid_t pid, int status)
 			break;
 	}
 	if (job == NULL) {
+#ifdef TMUX_DEBUG_EXIT
 		{
 			FILE *diag = fopen("C:\\temp\\tmux-exit.log", "a");
 			if (diag) {
@@ -493,8 +496,10 @@ job_check_died(pid_t pid, int status)
 				fclose(diag);
 			}
 		}
+#endif
 		return;
 	}
+#ifdef TMUX_DEBUG_EXIT
 	{
 		FILE *diag = fopen("C:\\temp\\tmux-exit.log", "a");
 		if (diag) {
@@ -504,6 +509,7 @@ job_check_died(pid_t pid, int status)
 			fclose(diag);
 		}
 	}
+#endif
 	if (WIFSTOPPED(status)) {
 		if (WSTOPSIG(status) == SIGTTIN || WSTOPSIG(status) == SIGTTOU)
 			return;

@@ -86,6 +86,7 @@ process_watcher_thread(LPVOID arg)
 
 						LeaveCriticalSection(&watch_lock);
 
+#ifdef TMUX_DEBUG_EXIT
 						{
 							FILE *diag = fopen("C:\\temp\\tmux-exit.log", "a");
 							if (diag) {
@@ -94,6 +95,7 @@ process_watcher_thread(LPVOID arg)
 								fclose(diag);
 							}
 						}
+#endif
 
 						/* Encode exit code like Unix: (code << 8). */
 						win32_child_exited(pid, (int)(exit_code << 8));
@@ -154,6 +156,7 @@ void
 win32_process_watch(HANDLE hProcess, pid_t pid)
 {
 	HANDLE dup;
+#ifdef TMUX_DEBUG_EXIT
 	FILE *diag;
 
 	diag = fopen("C:\\temp\\tmux-exit.log", "a");
@@ -178,6 +181,11 @@ win32_process_watch(HANDLE hProcess, pid_t pid)
 		fflush(diag);
 		fclose(diag);
 	}
+#else
+	if (!DuplicateHandle(GetCurrentProcess(), hProcess,
+	    GetCurrentProcess(), &dup, 0, FALSE, DUPLICATE_SAME_ACCESS))
+		return;
+#endif
 
 	EnterCriticalSection(&watch_lock);
 	if (nwatched < MAX_WATCHED) {

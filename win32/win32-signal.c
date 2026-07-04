@@ -124,22 +124,26 @@ win32_signal_notify(int signo)
 	char c = (char)signo;
 
 	if (signal_pipe[1] != INVALID_SOCKET) {
-		int sent = send(signal_pipe[1], &c, 1, 0);
+		send(signal_pipe[1], &c, 1, 0);
+#ifdef TMUX_DEBUG_EXIT
 		{
 			FILE *diag = fopen("C:\\temp\\tmux-exit.log", "a");
 			if (diag) {
-				fprintf(diag, "SIGNAL: signo=%d sent=%d\n", signo, sent);
+				fprintf(diag, "SIGNAL: signo=%d\n", signo);
 				fflush(diag);
 				fclose(diag);
 			}
 		}
+#endif
 	} else {
+#ifdef TMUX_DEBUG_EXIT
 		FILE *diag = fopen("C:\\temp\\tmux-exit.log", "a");
 		if (diag) {
 			fprintf(diag, "SIGNAL FAIL: pipe closed signo=%d\n", signo);
 			fflush(diag);
 			fclose(diag);
 		}
+#endif
 	}
 }
 
@@ -166,17 +170,16 @@ win32_signal_dispatch(void)
 	if (n <= 0)
 		return;
 
+#ifdef TMUX_DEBUG_EXIT
 	{
 		FILE *diag = fopen("C:\\temp\\tmux-exit.log", "a");
 		if (diag) {
-			fprintf(diag, "DISPATCH: n=%d bytes=", n);
-			for (i = 0; i < n; i++)
-				fprintf(diag, "%d ", (int)buf[i]);
-			fprintf(diag, "\n");
+			fprintf(diag, "DISPATCH: n=%d\n", n);
 			fflush(diag);
 			fclose(diag);
 		}
 	}
+#endif
 
 	for (i = 0; i < n; i++) {
 		if (signal_callback != NULL)
