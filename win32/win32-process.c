@@ -86,6 +86,15 @@ process_watcher_thread(LPVOID arg)
 
 						LeaveCriticalSection(&watch_lock);
 
+						{
+							FILE *diag = fopen("C:\\temp\\tmux-exit.log", "a");
+							if (diag) {
+								fprintf(diag, "EXIT: pid=%d code=%lu\n", (int)pid, exit_code);
+								fflush(diag);
+								fclose(diag);
+							}
+						}
+
 						/* Encode exit code like Unix: (code << 8). */
 						win32_child_exited(pid, (int)(exit_code << 8));
 
@@ -145,11 +154,30 @@ void
 win32_process_watch(HANDLE hProcess, pid_t pid)
 {
 	HANDLE dup;
+	FILE *diag;
+
+	diag = fopen("C:\\temp\\tmux-exit.log", "a");
+	if (diag) {
+		fprintf(diag, "WATCH: pid=%d hProcess=%p\n", (int)pid, hProcess);
+		fflush(diag);
+	}
 
 	/* Duplicate the handle so we own it. */
 	if (!DuplicateHandle(GetCurrentProcess(), hProcess,
-	    GetCurrentProcess(), &dup, 0, FALSE, DUPLICATE_SAME_ACCESS))
+	    GetCurrentProcess(), &dup, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
+		if (diag) {
+			fprintf(diag, "WATCH FAIL: pid=%d err=%lu\n", (int)pid, GetLastError());
+			fflush(diag);
+			fclose(diag);
+		}
 		return;
+	}
+	if (diag) {
+		fprintf(diag, "WATCH OK: pid=%d dup=%p nwatched=%d\n",
+		    (int)pid, dup, nwatched);
+		fflush(diag);
+		fclose(diag);
+	}
 
 	EnterCriticalSection(&watch_lock);
 	if (nwatched < MAX_WATCHED) {

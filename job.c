@@ -144,7 +144,6 @@ job_run(const char *cmd, int argc, char **argv, struct environ *e,
 		free(cmdline);
 		if (pty == NULL)
 			goto fail;
-		win32_process_watch(win32_pty_get_process(pty), pid);
 	} else {
 		if (socketpair(AF_UNIX, SOCK_STREAM, PF_UNSPEC, out) != 0)
 			goto fail;
@@ -176,6 +175,17 @@ job_run(const char *cmd, int argc, char **argv, struct environ *e,
 	job->status = 0;
 
 	LIST_INSERT_HEAD(&all_jobs, job, entry);
+
+#ifdef _WIN32
+	/*
+	 * Register process watch AFTER job is in list to avoid race
+	 * condition where fast-exiting commands (like "echo hello")
+	 * trigger SIGCHLD before job_check_died can find the job.
+	 * Non-PTY jobs are already watched by win32_process_spawn.
+	 */
+	if (flags & JOB_PTY)
+		win32_process_watch(win32_pty_get_process(pty), pid);
+#endif
 
 	job->updatecb = updatecb;
 	job->completecb = completecb;
