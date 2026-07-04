@@ -317,8 +317,21 @@ popup_draw_cb(struct client *c, void *data, struct screen_redraw_ctx *rctx)
 		screen_write_cursormove(&ctx, 0, 0, 0);
 		screen_write_fast_copy(&ctx, &pd->s, 0, 0, pd->sx, pd->sy);
 	} else if (pd->sx > 2 && pd->sy > 2) {
+		const char	*title = pd->title;
+		char		 hint[256];
+
+		/*
+		 * If the popup won't auto-close on exit, show a dismiss
+		 * hint so users know to press ESC (or Ctrl-C).
+		 */
+		if ((pd->flags & (POPUP_CLOSEEXIT|POPUP_CLOSEEXITZERO)) == 0) {
+			snprintf(hint, sizeof hint, "%s%s",
+			    *title != '\0' ? title : "",
+			    " [ESC to close]");
+			title = hint;
+		}
 		screen_write_box(&ctx, pd->sx, pd->sy, pd->border_lines,
-		    &pd->border_cell, pd->title);
+		    &pd->border_cell, title);
 		screen_write_cursormove(&ctx, 1, 1, 0);
 		screen_write_fast_copy(&ctx, &pd->s, 0, 0, pd->sx - 2,
 		    pd->sy - 2);
