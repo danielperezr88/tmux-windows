@@ -276,16 +276,31 @@ win32_pty_close(struct win32_pty *pty)
 }
 
 /*
- * Signal the bridge threads to stop (set closing=1) without closing
- * handles or waiting. Called from job_check_died when the child process
- * exits, so the bridge thread breaks out of ReadFile on the ConPTY pipe
- * and closes the socket, triggering the bufferevent error callback.
+ * Signal the bridge threads to stop and close ConPTY handles so ReadFile
+ * unblocks. Unlike win32_pty_close, this does NOT wait for threads or
+ * terminate the process — it just closes the pseudo console handles
+ * so the bridge thread breaks out of ReadFile, closes its socket,
+ * triggering the bufferevent error callback which calls completecb
+ * then job_free. job_free calls win32_pty_close for full cleanup.
  */
 void
 win32_pty_signal_close(struct win32_pty *pty)
 {
-	if (pty != NULL)
-		pty->closing = 1;
+	if (pty == NULL)
+		return;
+	pty->closing = 1;
+	if (pty->hPC != NULL) {
+		ClosePseudoConsole(pty->hPC);
+		pty->hPC = NULL;
+	}
+	if (pty->hPipeOut != NULL) {
+		CloseHandle(pty->hPipeOut);
+		pty->hPipeOut = NULL;
+	}
+	if (pty->hPipeIn != NULL) {
+		CloseHandle(pty->hPipeIn);
+		pty->hPipeIn = NULL;
+	}
 }
 
 int
