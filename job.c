@@ -140,6 +140,8 @@ job_run(const char *cmd, int argc, char **argv, struct environ *e,
 			xasprintf(&cmdline, "%s /c %s", shell, cmd);
 		else
 			cmdline = cmd_stringify_argv(argc, argv);
+		log_debug("JOB_PTY: shell='%s' cmdline='%s' cwd='%s'", shell,
+		    cmdline, cwd ? cwd : "(null)");
 		pty = win32_pty_spawn(cmdline, cwd, NULL, sx, sy, &pid);
 		free(cmdline);
 		if (pty == NULL)
