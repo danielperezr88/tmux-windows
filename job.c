@@ -382,9 +382,11 @@ job_free(struct job *job)
 		bufferevent_free(job->event);
 #ifdef _WIN32
 	if (job->win32_pty != NULL) {
-		win32_pty_close((struct win32_pty *)job->win32_pty);
+		/* signal_close already forced bridge threads to exit;
+		 * use non-blocking cleanup to avoid stalling event loop */
+		win32_pty_free_quick((struct win32_pty *)job->win32_pty);
 		job->win32_pty = NULL;
-		job->fd = -1; /* already closed by win32_pty_close */
+		job->fd = -1; /* already closed by win32_pty_free_quick */
 	}
 #endif
 	if (job->fd != -1)

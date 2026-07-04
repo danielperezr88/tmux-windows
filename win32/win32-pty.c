@@ -276,6 +276,30 @@ win32_pty_close(struct win32_pty *pty)
 }
 
 /*
+ * Quick cleanup after win32_pty_signal_close has already forced the
+ * bridge threads to exit. Closes remaining handles without blocking.
+ */
+void
+win32_pty_free_quick(struct win32_pty *pty)
+{
+	if (pty == NULL)
+		return;
+	if (pty->bridge_thread != NULL)
+		CloseHandle(pty->bridge_thread);
+	if (pty->input_thread != NULL)
+		CloseHandle(pty->input_thread);
+	if (pty->hProcess != NULL)
+		CloseHandle(pty->hProcess);
+	if (pty->hThread != NULL)
+		CloseHandle(pty->hThread);
+	if (pty->sock != INVALID_SOCKET)
+		closesocket(pty->sock);
+	if (pty->bridge_peer != INVALID_SOCKET)
+		closesocket(pty->bridge_peer);
+	free(pty);
+}
+
+/*
  * Signal the bridge threads to stop and close ConPTY handles so ReadFile
  * unblocks. Unlike win32_pty_close, this does NOT wait for threads or
  * terminate the process — it just closes the pseudo console handles
